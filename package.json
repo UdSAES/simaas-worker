@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/UdSAES/simaas_worker/issues"
   },
-  "homepage": "https://github.com/UdSAES/simaas_worker#readme"
+  "homepage": "https://github.com/UdSAES/simaas_worker#readme",
+  "dependencies": {
+    "fs-extra": "^6.0.1",
+    "request": "^2.86.0",
+    "request-promise-native": "^1.0.5",
+    "tmp-promise": "^1.0.4"
+  }
 }
