@@ -1,0 +1,19 @@
+{
+  "name": "simaas_worker",
+  "version": "0.1.0",
+  "description": "Tiny micro service to run simulations based on a given FMU",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UdSAES/simaas_worker.git"
+  },
+  "author": "Florian Wagner <florian.wagner@aut.uni-saarland.de>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UdSAES/simaas_worker/issues"
+  },
+  "homepage": "https://github.com/UdSAES/simaas_worker#readme"
+}
