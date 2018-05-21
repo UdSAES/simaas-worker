@@ -139,7 +139,44 @@ function convertCsvToTimeseriesArray (csv, modelInfo) {
 }
 
 async function processSimulationTask(task) {
-  
+  const modelInstanceId = task['model-instance-id']
+  const input = task['input']
+
+  // create model file
+  const modelFile = await tmp.file()
+  const modelFileContent = await fs.readFile(path.join(MODEL_BASE_PATH, modelInstanceId, 'model_instance.fmu'), {
+    encoding: null
+  })
+  await fs.writeFile(modelFile.path, modelFileContent, {encoding: null})
+
+  // create tmp file for input
+  const inputFile = await tmp.file()
+  const csv = convertTimeseriesArrayToCsv(input)
+
+  await fs.writeFile(inputFile.path, csv, {
+    encoding: 'utf8'
+  })
+
+  // create tmp file for output
+  const outputFile = await tmp.file()
+
+  // get info about fmu
+  const infoResult = await execFile('pipenv', ['run', 'fmpy', 'info', modelFile.path])
+  const modelInfo = parseFMPYInfoOutput(infoResult.stdout)
+
+  // run simulation
+  const {
+    stdout,
+    stderr
+  } = await execFile('pipenv', ['run', 'fmpy', 'simulate', modelFile.path, '--output-file=' + outputFile.path, '--input-file=' + inputFile.path])
+
+  const output = await fs.readFile(outputFile.path, {encoding: 'utf8'})
+
+  outputFile.cleanup()
+  inputFile.cleanup()
+  modelFile.cleanup()
+
+  return { output: output, modelInfo: modelInfo };
 }
 
 async function main () {
@@ -152,47 +189,10 @@ async function main () {
     })
 
     const taskId = result.body.id
-    const modelInstanceId = result.body.task['model-instance-id']
-    const input = result.body.task['input']
 
-    // create model file
-    const modelFile = await tmp.file()
-    const modelFileContent = await fs.readFile(path.join(MODEL_BASE_PATH, modelInstanceId, 'model_instance.fmu'), {
-      encoding: null
-    })
-    await fs.writeFile(modelFile.path, modelFileContent, {encoding: null})
+    const simulationResult = await processSimulationTask(result.body.task)
 
-    // create tmp file for input
-    const inputFile = await tmp.file()
-    const csv = convertTimeseriesArrayToCsv(input)
-    
-    await fs.writeFile(inputFile.path, csv, {
-      encoding: 'utf8'
-    })
-
-
-    // create tmp file for output
-    const outputFile = await tmp.file()
-
-    // get info about fmu
-    const infoResult = await execFile('pipenv', ['run', 'fmpy', 'info', modelFile.path])
-    
-    const modelInfo = parseFMPYInfoOutput(infoResult.stdout)
-
-    // run simulation
-    const {
-      stdout,
-      stderr
-    } = await execFile('pipenv', ['run', 'fmpy', 'simulate', modelFile.path, '--output-file=' + outputFile.path, '--input-file=' + inputFile.path])
-
-    const output = await fs.readFile(outputFile.path, {encoding: 'utf8'})
-    
-    
-    outputFile.cleanup()
-    inputFile.cleanup()
-    modelFile.cleanup()
-    
-    const outputTimeseriesArray = convertCsvToTimeseriesArray(output, modelInfo)
+    const outputTimeseriesArray = convertCsvToTimeseriesArray(simulationResult.output, simulationResult.modelInfo)
 
     const setResultResponse = request({
       url: 'http://127.0.0.1:22345/workToDo/results/' + taskId,
