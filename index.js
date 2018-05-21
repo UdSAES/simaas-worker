@@ -8,7 +8,8 @@ const tmp = require('tmp-promise')
 const path = require('path')
 const _ = require('lodash')
 
-const  MODEL_BASE_PATH = process.env.MODEL_BASE_PATH || './sample_data'
+const URL_QUEUE = process.env.URL_QUEUE || 'http://localhost:12345'
+const MODEL_BASE_PATH = process.env.MODEL_BASE_PATH || './sample_data'
 
 const COLUMN_SEPARATOR = ','
 
@@ -52,7 +53,7 @@ function parseFMPYInfoOutput (infoOutput) {
   const result = {
     variableDefinitions: variableDefinitions
   }
-  
+
   console.log(result)
 
   return result
@@ -65,7 +66,7 @@ function convertTimeseriesArrayToCsv (timeseriesArray) {
     })
   })
 
-  
+
 
   const timestamps = _.map(_.first(timeseriesArray).timeseries, (te) => {
     return te.timestamp
@@ -126,7 +127,7 @@ function convertCsvToTimeseriesArray (csv, modelInfo) {
     timeseriesItem.unit = _.find(modelInfo.variableDefinitions, (variableDefinition) => {
       return variableDefinition.name === heading
     }).unit
-    
+
 
     timeseriesItem.timeseries = _.map(columns[columnIndex], (value, rowIndex) => {
       return {timestamp: columns[0][rowIndex], value: value}
@@ -134,7 +135,7 @@ function convertCsvToTimeseriesArray (csv, modelInfo) {
 
     timeseriesArray.push(timeseriesItem)
   })
-  
+
   return timeseriesArray
 }
 
@@ -182,7 +183,7 @@ async function processSimulationTask(task) {
 async function main () {
   try {
     const result = await request({
-      url: 'http://leela.msaas.me:22345/workToDo/pull',
+      url: URL_QUEUE + '/tasks/_pull',
       method: 'post',
       json: true,
       resolveWithFullResponse: true
@@ -195,7 +196,7 @@ async function main () {
     const outputTimeseriesArray = convertCsvToTimeseriesArray(simulationResult.output, simulationResult.modelInfo)
 
     const setResultResponse = request({
-      url: 'http://127.0.0.1:22345/workToDo/results/' + taskId,
+      url: URL_QUEUE + '/tasks/' + taskId + '/result',
       method: 'post',
       json: true,
       resolveWithFullResponse: true,
@@ -205,7 +206,7 @@ async function main () {
       }
     })
 
-    // console.log(setResultResponse)
+    // console.log(setResultResponse.body)
 
   } catch (error) {
     console.log('error', error)
