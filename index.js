@@ -7,11 +7,33 @@ const request = require('request-promise-native')
 const tmp = require('tmp-promise')
 const path = require('path')
 const _ = require('lodash')
+const delay = require('delay')
+const bunyan = require('bunyan')
+const logging = require('./lib/logging')
 
-const URL_QUEUE = process.env.URL_QUEUE || 'http://localhost:12345'
+const URL_QUEUE = process.env.URL_QUEUE || 'http://localhost:22345'
 const MODEL_BASE_PATH = process.env.MODEL_BASE_PATH || './sample_data'
+const WAIT_TIME = process.env.WAIT_TIME || 50
 
 const COLUMN_SEPARATOR = ','
+const EVENTS = {
+  TASK_HANDLED_SUCCESSFULLY: 31001,
+  UNEXPECTED_STATUS_CODE: 50001,
+  TASK_ID_INVALID: 50002,
+  TASK_INVALID: 50003,
+  SIMULATION_FAILED: 50004,
+  SET_RESULT_FAILED: 50005,
+  TASK_NOT_AVAILABLE_ANYMORE: 50006,
+  PULLING_TASK_FAILED: 50007,
+}
+
+const log = logging.createLogger('simaas_worker')
+
+function createError(message, code) {
+  const error = new Error(message)
+  error.code = code
+  return error
+}
 
 function parseFMPYInfoOutput (infoOutput) {
   const VARIABLE_SECTION_HEADER = 'Variables (input, output)'
@@ -53,8 +75,6 @@ function parseFMPYInfoOutput (infoOutput) {
   const result = {
     variableDefinitions: variableDefinitions
   }
-
-  console.log(result)
 
   return result
 }
@@ -181,37 +201,93 @@ async function processSimulationTask(task) {
 }
 
 async function main () {
-  try {
-    const result = await request({
-      url: URL_QUEUE + '/tasks/_pull',
-      method: 'post',
-      json: true,
-      resolveWithFullResponse: true
-    })
+  while (true) {
+    await delay(WAIT_TIME)
+    let pullTaskResult = null
+    
+    // pull task
+    try {
+      pullTaskResult = await request({
+        url: URL_QUEUE + '/tasks/_pull',
+        method: 'post',
+        json: true,
+        resolveWithFullResponse: true
+      })
+    } catch (error) {
+      // something went wrong
+      log.error('pulling a task failed', EVENTS.PULLING_TASK_FAILED, error)
+      continue
+    }
 
-    const taskId = result.body.id
+    
+    // no item available
+    if (pullTaskResult.statusCode === 204) {
+      continue
+    }
+    
+    if (pullTaskResult.statusCode !== 200) {
+      // unexpected status code
+      log.error('unexpected status code for pulling task', EVENTS.UNEXPECTED_STATUS_CODE, new Error('' + pullTaskResult.statusCode))
+      continue
+    }
+    
+    log.info('task pulled')
+    const taskId = _.get(pullTaskResult, ['body', 'id'])
+    const task = _.get(pullTaskResult, ['body', 'task'])
 
-    const simulationResult = await processSimulationTask(result.body.task)
+    // taskId invalid
+    if (!_.isString(taskId)) {
+      log.error('invalid taskId', EVENTS.TASK_ID_INVALID)
+      continue
+    }
+    
+    // task invalid
+    if (!_.isPlainObject(task)) {
+      log.error('invalid task', EVENTS.TASK_INVALID)
+      continue
+    }
+
+    let simulationResult = null
+    try {
+      simulationResult = await processSimulationTask(task)
+    } catch (error) {
+      log.error('simulation failed', EVENTS.SIMULATION_FAILED, error)
+      continue
+    }
 
     const outputTimeseriesArray = convertCsvToTimeseriesArray(simulationResult.output, simulationResult.modelInfo)
 
-    const setResultResponse = request({
-      url: URL_QUEUE + '/tasks/' + taskId + '/result',
-      method: 'post',
-      json: true,
-      resolveWithFullResponse: true,
-      body: {
-        error: null,
-        result: outputTimeseriesArray
-      }
-    })
+    let setResultResponse = null
+    try {
+      setResultResponse = await request({
+        url: URL_QUEUE + '/tasks/' + taskId + '/result',
+        method: 'post',
+        json: true,
+        resolveWithFullResponse: true,
+        body: {
+          error: null,
+          result: outputTimeseriesArray
+        }
+      })
+    } catch (error) {
+      log.error('set result failed', EVENTS.SET_RESULT_FAILED, error)
+      continue
+    }
 
-    // console.log(setResultResponse.body)
+    // task not available anymore
+    if (setResultResponse.statusCode === 404) {
+      log.error('task not available anymore', EVENTS.TASK_NOT_AVAILABLE_ANYMORE)
+      continue
+    }
 
-  } catch (error) {
-    console.log('error', error)
+    if (setResultResponse.statusCode !== 200) {
+      log.error('unexpected status code for set result', EVENTS.UNEXPECTED_STATUS_CODE, new Error('' + setResultResponse.statusCode))
+      continue
+    }
+
+    log.info('successfull run', EVENTS.TASK_HANDLED_SUCCESSFULLY)
+    // everything is fine
   }
-
 }
 
 main()
