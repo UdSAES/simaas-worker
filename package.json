@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/UdSAES/simaas_worker#readme",
   "dependencies": {
-    "bunyan": "^1.8.12",
     "delay": "^2.0.0",
     "fs-extra": "^6.0.1",
     "lodash": "^4.17.10",

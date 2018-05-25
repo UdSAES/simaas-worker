@@ -8,7 +8,6 @@ const tmp = require('tmp-promise')
 const path = require('path')
 const _ = require('lodash')
 const delay = require('delay')
-const bunyan = require('bunyan')
 const logging = require('./lib/logging')
 
 const URL_QUEUE = process.env.URL_QUEUE || 'http://localhost:22345'
@@ -204,7 +203,7 @@ async function main () {
   while (true) {
     await delay(WAIT_TIME)
     let pullTaskResult = null
-    
+
     // pull task
     try {
       pullTaskResult = await request({
@@ -219,18 +218,18 @@ async function main () {
       continue
     }
 
-    
+
     // no item available
     if (pullTaskResult.statusCode === 204) {
       continue
     }
-    
+
     if (pullTaskResult.statusCode !== 200) {
       // unexpected status code
       log.error('unexpected status code for pulling task', EVENTS.UNEXPECTED_STATUS_CODE, new Error('' + pullTaskResult.statusCode))
       continue
     }
-    
+
     log.info('task pulled')
     const taskId = _.get(pullTaskResult, ['body', 'id'])
     const task = _.get(pullTaskResult, ['body', 'task'])
@@ -240,7 +239,7 @@ async function main () {
       log.error('invalid taskId', EVENTS.TASK_ID_INVALID)
       continue
     }
-    
+
     // task invalid
     if (!_.isPlainObject(task)) {
       log.error('invalid task', EVENTS.TASK_INVALID)
