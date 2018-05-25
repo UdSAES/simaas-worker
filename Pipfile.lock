@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "10eb8c9a4f6bf498d153a1b20b22615b96b8a104d54189d05dde8afc2214dfe5"
+            "sha256": "165520bec76ac8c7e118866b4b1a26ed4ad315d7ff4c3438b79b0fde00a658a0"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -29,8 +29,12 @@
         ]
     },
     "default": {
-        "7304647": {
-            "file": "https://github.com/UdSAES/FMPy/archive/develop.zip"
+        "3f38040": {
+            "file": "https://github.com/UdSAES/FMPy/archive/master.zip"
+        },
+        "pathlib": {
+            "hashes": [],
+            "version": "==1.0.1"
         }
     },
     "develop": {}
