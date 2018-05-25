@@ -159,8 +159,8 @@ function convertCsvToTimeseriesArray (csv, modelInfo) {
 }
 
 async function processSimulationTask(task) {
-  const modelInstanceId = task['model-instance-id']
-  const input = task['input']
+  const modelInstanceId = task['model_instance_id']
+  const input = task['input_timeseries']
 
   // create model file
   const modelFile = await tmp.file()
@@ -284,7 +284,7 @@ async function main () {
       continue
     }
 
-    log.info('successfull run', EVENTS.TASK_HANDLED_SUCCESSFULLY)
+    log.info('successful run', EVENTS.TASK_HANDLED_SUCCESSFULLY)
     // everything is fine
   }
 }
