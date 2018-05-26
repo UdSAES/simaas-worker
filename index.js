@@ -1,5 +1,20 @@
 'use strict'
 
+const createLogger = require('designetz_logger')
+const log = createLogger('simaas_worker')
+
+process.on('uncaughtException', (error) => {
+  if (!modulesLoaded) {
+    log.any('loading module failed', 60000, error)
+    process.exit(1)
+  }
+
+  log.any('service instance crashed', 60005, error)
+  process.exit(1)
+})
+
+let modulesLoaded = false
+
 const {promisify} = require('util')
 const execFile = promisify(require('child_process').execFile)
 const fs = require('fs-extra')
@@ -8,15 +23,38 @@ const tmp = require('tmp-promise')
 const path = require('path')
 const _ = require('lodash')
 const delay = require('delay')
-const logging = require('./lib/logging')
 
-const URL_QUEUE = process.env.URL_QUEUE || 'http://localhost:22345'
-const MODEL_BASE_PATH = process.env.MODEL_BASE_PATH || './sample_data'
+modulesLoaded = true
+
+log.any('software libraries successfully loaded', 30001)
+
+const QUEUE_ORIGIN = process.env.QUEUE_ORIGIN // e.g. 'https://localhost:22345'
+const MODEL_BASE_PATH = process.env.MODEL_BASE_PATH // e.g. './sample_data'
 const WAIT_TIME = process.env.WAIT_TIME || 50
+
+log.any('configuration data successfully loaded', 30002)
+
+if (!_.isString(QUEUE_ORIGIN) || QUEUE_ORIGIN.length < 1) {
+  log.any('QUEUE_ORIGIN is ' + QUEUE_ORIGIN + ' but must be string of length 1 or longer', 60002)
+  process.exit(1)
+}
+
+if (!_.isString(MODEL_BASE_PATH)) {
+  log.any('MODEL_BASE_PATH is ' + MODEL_BASE_PATH + ' but must be a string', 60002)
+  process.exit(1)
+}
+
+if (!_.isInteger(WAIT_TIME) || WAIT_TIME < 1) {
+  log.any('WAIT_TIME is ' + WAIT_TIME + ' but must be a positive integer value', 60002)
+  process.exit(1)
+}
+
+log.any('configuration successfully done', 30003)
 
 const COLUMN_SEPARATOR = ','
 const EVENTS = {
   TASK_HANDLED_SUCCESSFULLY: 31001,
+  TAK_PULLED: 31002,
   UNEXPECTED_STATUS_CODE: 50001,
   TASK_ID_INVALID: 50002,
   TASK_INVALID: 50003,
@@ -24,14 +62,6 @@ const EVENTS = {
   SET_RESULT_FAILED: 50005,
   TASK_NOT_AVAILABLE_ANYMORE: 50006,
   PULLING_TASK_FAILED: 50007,
-}
-
-const log = logging.createLogger('simaas_worker')
-
-function createError(message, code) {
-  const error = new Error(message)
-  error.code = code
-  return error
 }
 
 function parseFMPYInfoOutput (infoOutput) {
@@ -84,8 +114,6 @@ function convertTimeseriesArrayToCsv (timeseriesArray) {
       return te.value
     })
   })
-
-
 
   const timestamps = _.map(_.first(timeseriesArray).timeseries, (te) => {
     return te.timestamp
@@ -200,21 +228,30 @@ async function processSimulationTask(task) {
 }
 
 async function main () {
+  log.any('service starts normal operation', 30004)
+  let isPullingTaskError = false
   while (true) {
-    await delay(WAIT_TIME)
+    if (isPullingTaskError) {
+      await delay(1000)
+    } else {
+      await delay(WAIT_TIME)
+    }
+    isPullingTaskError = false
+    
     let pullTaskResult = null
 
     // pull task
     try {
       pullTaskResult = await request({
-        url: URL_QUEUE + '/tasks/_pull',
+        url: QUEUE_ORIGIN + '/tasks/_pull',
         method: 'post',
         json: true,
         resolveWithFullResponse: true
       })
     } catch (error) {
+      isPullingTaskError = true
       // something went wrong
-      log.error('pulling a task failed', EVENTS.PULLING_TASK_FAILED, error)
+      log.any('pulling a task failed', EVENTS.PULLING_TASK_FAILED, error)
       continue
     }
 
@@ -225,24 +262,26 @@ async function main () {
     }
 
     if (pullTaskResult.statusCode !== 200) {
+      isPullingTaskError = true
       // unexpected status code
-      log.error('unexpected status code for pulling task', EVENTS.UNEXPECTED_STATUS_CODE, new Error('' + pullTaskResult.statusCode))
+      log.any('unexpected status code for pulling task', EVENTS.UNEXPECTED_STATUS_CODE, new Error('' + pullTaskResult.statusCode))
       continue
     }
 
-    log.info('task pulled')
+    log.any('task pulled', EVENTS.TAK_PULLED)
+
     const taskId = _.get(pullTaskResult, ['body', 'id'])
     const task = _.get(pullTaskResult, ['body', 'task'])
 
     // taskId invalid
     if (!_.isString(taskId)) {
-      log.error('invalid taskId', EVENTS.TASK_ID_INVALID)
+      log.any('invalid taskId', EVENTS.TASK_ID_INVALID)
       continue
     }
 
     // task invalid
     if (!_.isPlainObject(task)) {
-      log.error('invalid task', EVENTS.TASK_INVALID)
+      log.any('invalid task', EVENTS.TASK_INVALID)
       continue
     }
 
@@ -250,7 +289,7 @@ async function main () {
     try {
       simulationResult = await processSimulationTask(task)
     } catch (error) {
-      log.error('simulation failed', EVENTS.SIMULATION_FAILED, error)
+      log.any('simulation failed', EVENTS.SIMULATION_FAILED, error)
       continue
     }
 
@@ -259,7 +298,7 @@ async function main () {
     let setResultResponse = null
     try {
       setResultResponse = await request({
-        url: URL_QUEUE + '/tasks/' + taskId + '/result',
+        url: QUEUE_ORIGIN + '/tasks/' + taskId + '/result',
         method: 'post',
         json: true,
         resolveWithFullResponse: true,
@@ -269,22 +308,22 @@ async function main () {
         }
       })
     } catch (error) {
-      log.error('set result failed', EVENTS.SET_RESULT_FAILED, error)
+      log.any('set result failed', EVENTS.SET_RESULT_FAILED, error)
       continue
     }
 
     // task not available anymore
     if (setResultResponse.statusCode === 404) {
-      log.error('task not available anymore', EVENTS.TASK_NOT_AVAILABLE_ANYMORE)
+      log.any('task not available anymore', EVENTS.TASK_NOT_AVAILABLE_ANYMORE)
       continue
     }
 
     if (setResultResponse.statusCode !== 200) {
-      log.error('unexpected status code for set result', EVENTS.UNEXPECTED_STATUS_CODE, new Error('' + setResultResponse.statusCode))
+      log.any('unexpected status code for set result', EVENTS.UNEXPECTED_STATUS_CODE, new Error('' + setResultResponse.statusCode))
       continue
     }
 
-    log.info('successful run', EVENTS.TASK_HANDLED_SUCCESSFULLY)
+    log.any('successful run', EVENTS.TASK_HANDLED_SUCCESSFULLY)
     // everything is fine
   }
 }

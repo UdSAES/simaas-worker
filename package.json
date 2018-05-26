@@ -18,6 +18,7 @@
   "homepage": "https://github.com/UdSAES/simaas_worker#readme",
   "dependencies": {
     "delay": "^2.0.0",
+    "designetz_logger": "^0.1.1",
     "fs-extra": "^6.0.1",
     "lodash": "^4.17.10",
     "request": "^2.86.0",
