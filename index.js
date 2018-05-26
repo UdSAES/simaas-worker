@@ -141,7 +141,7 @@ function convertTimeseriesArrayToCsv (timeseriesArray) {
   return rows.join('\n')
 }
 
-function convertCsvToTimeseriesArray (csv, modelInfo) {
+function convertCsvToTimeseriesArray (csv, modelInfo, startTime) {
   csv = csv.replace(/\r\n/g, '\n')
   const lines = csv.split('\n')
 
@@ -177,7 +177,10 @@ function convertCsvToTimeseriesArray (csv, modelInfo) {
 
 
     timeseriesItem.timeseries = _.map(columns[columnIndex], (value, rowIndex) => {
-      return {timestamp: columns[0][rowIndex], value: value}
+      return {
+        timestamp: (columns[0][rowIndex] * 1000 + startTime),
+        value: value
+      }
     })
 
     timeseriesArray.push(timeseriesItem)
@@ -189,6 +192,7 @@ function convertCsvToTimeseriesArray (csv, modelInfo) {
 async function processSimulationTask(task) {
   const modelInstanceId = task['model_instance_id']
   const input = task['input_timeseries']
+  const simulationParameters = task['simulation_parameters']
 
   // create model file
   const modelFile = await tmp.file()
@@ -216,7 +220,15 @@ async function processSimulationTask(task) {
   const {
     stdout,
     stderr
-  } = await execFile('pipenv', ['run', 'fmpy', 'simulate', modelFile.path, '--output-file=' + outputFile.path, '--input-file=' + inputFile.path])
+  } = await execFile('pipenv', [
+    'run', 'fmpy', 'simulate', modelFile.path,
+      '--output-file=' + outputFile.path,
+      '--input-file=' + inputFile.path,
+      '--start-time=' + 0,
+      '--stop-time=' + parseInt((simulationParameters['stop_time'] - simulationParameters['start_time'])/1000),
+      '--output-interval=' + simulationParameters['output_interval'],
+    ]
+  )
 
   const output = await fs.readFile(outputFile.path, {encoding: 'utf8'})
 
@@ -237,7 +249,7 @@ async function main () {
       await delay(WAIT_TIME)
     }
     isPullingTaskError = false
-    
+
     let pullTaskResult = null
 
     // pull task
@@ -293,7 +305,8 @@ async function main () {
       continue
     }
 
-    const outputTimeseriesArray = convertCsvToTimeseriesArray(simulationResult.output, simulationResult.modelInfo)
+    const simulationStartTime = parseInt(task['simulation_parameters']['start_time'])
+    const outputTimeseriesArray = convertCsvToTimeseriesArray(simulationResult.output, simulationResult.modelInfo, simulationStartTime)
 
     let setResultResponse = null
     try {
