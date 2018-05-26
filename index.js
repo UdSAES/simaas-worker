@@ -30,7 +30,7 @@ log.any('software libraries successfully loaded', 30001)
 
 const QUEUE_ORIGIN = process.env.QUEUE_ORIGIN // e.g. 'https://localhost:22345'
 const MODEL_BASE_PATH = process.env.MODEL_BASE_PATH // e.g. './sample_data'
-const WAIT_TIME = process.env.WAIT_TIME || 50
+const WAIT_TIME = parseInt(process.env.WAIT_TIME) || 50
 
 log.any('configuration data successfully loaded', 30002)
 
