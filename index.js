@@ -31,6 +31,7 @@ log.any('software libraries successfully loaded', 30001)
 const QUEUE_ORIGIN = process.env.QUEUE_ORIGIN // e.g. 'https://localhost:22345'
 const MODEL_BASE_PATH = process.env.MODEL_BASE_PATH // e.g. './sample_data'
 const WAIT_TIME = parseInt(process.env.WAIT_TIME) || 50
+const ALIVE_EVENT_WAIT_TIME = parseInt(process.env.ALIVE_EVENT_WAIT_TIME) || 3600 * 1000
 
 log.any('configuration data successfully loaded', 30002)
 
@@ -46,6 +47,11 @@ if (!_.isString(MODEL_BASE_PATH)) {
 
 if (!_.isInteger(WAIT_TIME) || WAIT_TIME < 1) {
   log.any('WAIT_TIME is ' + WAIT_TIME + ' but must be a positive integer value', 60002)
+  process.exit(1)
+}
+
+if (!(_.isNumber(ALIVE_EVENT_WAIT_TIME) && ALIVE_EVENT_WAIT_TIME > 0)) {
+  log.any('ALIVE_EVENT_WAIT_TIME is ' + ALIVE_EVENT_WAIT_TIME + ' but must be positive integer number larger than 0', 60002)
   process.exit(1)
 }
 
@@ -341,4 +347,12 @@ async function main () {
   }
 }
 
+async function aliveLoop() {
+  while (true) {
+    await delay(ALIVE_EVENT_WAIT_TIME)
+    log.any('service instance still running', 30007)
+  }
+}
+
 main()
+aliveLoop()
