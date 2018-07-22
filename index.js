@@ -226,8 +226,8 @@ async function processSimulationTask(task) {
   const {
     stdout,
     stderr
-  } = await execFile('pipenv', [
-    'run', 'fmpy', 'simulate', modelFile.path,
+  } = await execFile('fmpy', [
+      'simulate', modelFile.path,
       '--output-file=' + outputFile.path,
       '--input-file=' + inputFile.path,
       '--start-time=' + 0,
