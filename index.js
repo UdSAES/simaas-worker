@@ -219,7 +219,7 @@ async function processSimulationTask(task) {
   const outputFile = await tmp.file()
 
   // get info about fmu
-  const infoResult = await execFile('pipenv', ['run', 'fmpy', 'info', modelFile.path])
+  const infoResult = await execFile('fmpy', ['info', modelFile.path])
   const modelInfo = parseFMPYInfoOutput(infoResult.stdout)
 
   // run simulation
