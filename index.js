@@ -15,7 +15,7 @@ process.on('uncaughtException', (error) => {
 
 let modulesLoaded = false
 
-const {promisify} = require('util')
+const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 const fs = require('fs-extra')
 const request = require('request-promise-native')
@@ -67,7 +67,7 @@ const EVENTS = {
   SIMULATION_FAILED: 50004,
   SET_RESULT_FAILED: 50005,
   TASK_NOT_AVAILABLE_ANYMORE: 50006,
-  PULLING_TASK_FAILED: 50007,
+  PULLING_TASK_FAILED: 50007
 }
 
 function parseFMPYInfoOutput (infoOutput) {
@@ -142,7 +142,7 @@ function convertTimeseriesArrayToCsv (timeseriesArray) {
     }).join(COLUMN_SEPARATOR))
   })
 
-  rows.splice(1,0,rows[1])
+  rows.splice(1, 0, rows[1])
 
   return rows.join('\n')
 }
@@ -181,7 +181,6 @@ function convertCsvToTimeseriesArray (csv, modelInfo, startTime) {
       return variableDefinition.name === heading
     }).unit
 
-
     timeseriesItem.timeseries = _.map(columns[columnIndex], (value, rowIndex) => {
       return {
         timestamp: (columns[0][rowIndex] * 1000 + startTime),
@@ -195,7 +194,7 @@ function convertCsvToTimeseriesArray (csv, modelInfo, startTime) {
   return timeseriesArray
 }
 
-async function processSimulationTask(task) {
+async function processSimulationTask (task) {
   const modelInstanceId = task['model_instance_id']
   const input = task['input_timeseries']
   const simulationParameters = task['simulation_parameters']
@@ -205,7 +204,7 @@ async function processSimulationTask(task) {
   const modelFileContent = await fs.readFile(path.join(MODEL_BASE_PATH, modelInstanceId, 'model_instance.fmu'), {
     encoding: null
   })
-  await fs.writeFile(modelFile.path, modelFileContent, {encoding: null})
+  await fs.writeFile(modelFile.path, modelFileContent, { encoding: null })
 
   // create tmp file for input
   const inputFile = await tmp.file()
@@ -227,22 +226,22 @@ async function processSimulationTask(task) {
     stdout,
     stderr
   } = await execFile('fmpy', [
-      'simulate', modelFile.path,
-      '--output-file=' + outputFile.path,
-      '--input-file=' + inputFile.path,
-      '--start-time=' + 0,
-      '--stop-time=' + parseInt((simulationParameters['stop_time'] - simulationParameters['start_time'])/1000),
-      '--output-interval=' + simulationParameters['output_interval'],
-    ]
+    'simulate', modelFile.path,
+    '--output-file=' + outputFile.path,
+    '--input-file=' + inputFile.path,
+    '--start-time=' + 0,
+    '--stop-time=' + parseInt((simulationParameters['stop_time'] - simulationParameters['start_time']) / 1000),
+    '--output-interval=' + simulationParameters['output_interval']
+  ]
   )
 
-  const output = await fs.readFile(outputFile.path, {encoding: 'utf8'})
+  const output = await fs.readFile(outputFile.path, { encoding: 'utf8' })
 
   outputFile.cleanup()
   inputFile.cleanup()
   modelFile.cleanup()
 
-  return { output: output, modelInfo: modelInfo };
+  return { output: output, modelInfo: modelInfo }
 }
 
 async function main () {
@@ -272,7 +271,6 @@ async function main () {
       log.any('pulling a task failed', EVENTS.PULLING_TASK_FAILED, error)
       continue
     }
-
 
     // no item available
     if (pullTaskResult.statusCode === 204) {
@@ -347,7 +345,7 @@ async function main () {
   }
 }
 
-async function aliveLoop() {
+async function aliveLoop () {
   while (true) {
     await delay(ALIVE_EVENT_WAIT_TIME)
     log.any('service instance still running', 30007)
