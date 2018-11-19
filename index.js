@@ -11,11 +11,11 @@ log.any('service instance started', 300000)
 
 process.on('uncaughtException', (error) => {
   if (!modulesLoaded) {
-    log.any('loading module failed', 60000, error)
+    log.any('loading module failed', 600000, error)
     process.exit(1)
   }
 
-  log.any('service instance crashed', 60005, error)
+  log.any('service instance crashed', 600050, error)
   process.exit(1)
 })
 
@@ -32,48 +32,48 @@ const delay = require('delay')
 
 modulesLoaded = true
 
-log.any('software libraries successfully loaded', 30001)
+log.any('software libraries successfully loaded', 300010)
 
 const QUEUE_ORIGIN = process.env.QUEUE_ORIGIN // e.g. 'https://localhost:22345'
 const MODEL_BASE_PATH = process.env.MODEL_BASE_PATH // e.g. './sample_data'
 const WAIT_TIME = parseInt(process.env.WAIT_TIME) || 50
 const ALIVE_EVENT_WAIT_TIME = parseInt(process.env.ALIVE_EVENT_WAIT_TIME) || 3600 * 1000
 
-log.any('configuration data successfully loaded', 30002)
+log.any('configuration data successfully loaded', 300020)
 
 if (!_.isString(QUEUE_ORIGIN) || QUEUE_ORIGIN.length < 1) {
-  log.any('QUEUE_ORIGIN is ' + QUEUE_ORIGIN + ' but must be string of length 1 or longer', 60002)
+  log.any('QUEUE_ORIGIN is ' + QUEUE_ORIGIN + ' but must be string of length 1 or longer', 600020)
   process.exit(1)
 }
 
 if (!_.isString(MODEL_BASE_PATH)) {
-  log.any('MODEL_BASE_PATH is ' + MODEL_BASE_PATH + ' but must be a string', 60002)
+  log.any('MODEL_BASE_PATH is ' + MODEL_BASE_PATH + ' but must be a string', 600020)
   process.exit(1)
 }
 
 if (!_.isInteger(WAIT_TIME) || WAIT_TIME < 1) {
-  log.any('WAIT_TIME is ' + WAIT_TIME + ' but must be a positive integer value', 60002)
+  log.any('WAIT_TIME is ' + WAIT_TIME + ' but must be a positive integer value', 600020)
   process.exit(1)
 }
 
 if (!(_.isNumber(ALIVE_EVENT_WAIT_TIME) && ALIVE_EVENT_WAIT_TIME > 0)) {
-  log.any('ALIVE_EVENT_WAIT_TIME is ' + ALIVE_EVENT_WAIT_TIME + ' but must be positive integer number larger than 0', 60002)
+  log.any('ALIVE_EVENT_WAIT_TIME is ' + ALIVE_EVENT_WAIT_TIME + ' but must be positive integer number larger than 0', 600020)
   process.exit(1)
 }
 
-log.any('configuration successfully done', 30003)
+log.any('configuration successfully done', 300030)
 
 const COLUMN_SEPARATOR = ','
 const EVENTS = {
-  TASK_HANDLED_SUCCESSFULLY: 31001,
-  TAK_PULLED: 31002,
-  UNEXPECTED_STATUS_CODE: 50001,
-  TASK_ID_INVALID: 50002,
-  TASK_INVALID: 50003,
-  SIMULATION_FAILED: 50004,
-  SET_RESULT_FAILED: 50005,
-  TASK_NOT_AVAILABLE_ANYMORE: 50006,
-  PULLING_TASK_FAILED: 50007
+  TASK_HANDLED_SUCCESSFULLY: 301001,
+  TASK_PULLED: 301002,
+  UNEXPECTED_STATUS_CODE: 501001,
+  TASK_ID_INVALID: 501002,
+  TASK_INVALID: 501003,
+  SIMULATION_FAILED: 501004,
+  SET_RESULT_FAILED: 501005,
+  TASK_NOT_AVAILABLE_ANYMORE: 501006,
+  PULLING_TASK_FAILED: 501007
 }
 
 function parseFMPYInfoOutput (infoOutput) {
@@ -251,7 +251,7 @@ async function processSimulationTask (task) {
 }
 
 async function main () {
-  log.any('service starts normal operation', 30004)
+  log.any('service starts normal operation', 300040)
   let isPullingTaskError = false
   while (true) {
     if (isPullingTaskError) {
@@ -290,7 +290,7 @@ async function main () {
       continue
     }
 
-    log.any('task pulled', EVENTS.TAK_PULLED)
+    log.any('task pulled', EVENTS.TASK_PULLED)
 
     const taskId = _.get(pullTaskResult, ['body', 'id'])
     const task = _.get(pullTaskResult, ['body', 'task'])
@@ -354,7 +354,7 @@ async function main () {
 async function aliveLoop () {
   while (true) {
     await delay(ALIVE_EVENT_WAIT_TIME)
-    log.any('service instance still running', 30007)
+    log.any('service instance still running', 300100)
   }
 }
 
