@@ -236,8 +236,8 @@ async function processSimulationTask (task) {
     '--output-file=' + outputFile.path,
     '--input-file=' + inputFile.path,
     '--start-time=' + 0,
-    '--stop-time=' + parseInt((simulationParameters['stop_time'] - simulationParameters['start_time']) / 1000),
-    '--output-interval=' + simulationParameters['output_interval']
+    '--stop-time=' + parseInt((simulationParameters['stopTime'] - simulationParameters['startTime']) / 1000),
+    '--output-interval=' + simulationParameters['outputInterval']
   ]
   )
 
@@ -315,7 +315,7 @@ async function main () {
       continue
     }
 
-    const simulationStartTime = parseInt(task['simulation_parameters']['start_time'])
+    const simulationStartTime = parseInt(task['simulation_parameters']['startTime'])
     const outputTimeseriesArray = convertCsvToTimeseriesArray(simulationResult.output, simulationResult.modelInfo, simulationStartTime)
 
     let setResultResponse = null
