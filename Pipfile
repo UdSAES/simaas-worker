@@ -9,8 +9,6 @@ name = "pypi"
 
 pathlib = "*"
 "3f38040" = {file = "https://github.com/UdSAES/FMPy/archive/master.zip"}
-numpy = "*"
-lxml = "*"
 
 
 [dev-packages]
