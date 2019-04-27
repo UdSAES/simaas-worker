@@ -127,6 +127,10 @@ function convertTimeseriesArrayToCsv (timeseriesArray) {
     })
   })
 
+  // XXX the implementation below does not handle timeseries with different
+  // temporal resolution correctly!
+  // -- avoids introducing NaN iff first array is the shortest one
+  // -- will be unnecessary when implementing this in Python!
   const timestamps = _.map(_.first(timeseriesArray).timeseries, (te) => {
     return te.timestamp
   })
@@ -225,7 +229,7 @@ async function processSimulationTask (task) {
 
   // get info about fmu
   const infoResult = await execFile('fmpy', ['info', modelFile.path])
-  const modelInfo = parseFMPYInfoOutput(infoResult.stdout)
+  const modelInfo = parseFMPYInfoOutput(infoResult.stdout) // XXX broken
 
   // run simulation
   const {
@@ -240,6 +244,7 @@ async function processSimulationTask (task) {
     '--output-interval=' + simulationParameters['outputInterval']
   ]
   )
+  log.debug({stdout, stderr})
 
   const output = await fs.readFile(outputFile.path, { encoding: 'utf8' })
 
