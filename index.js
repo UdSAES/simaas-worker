@@ -321,6 +321,7 @@ async function main () {
       simulationResult = await processSimulationTask(task)
     } catch (error) {
       log.any('simulation failed', EVENTS.SIMULATION_FAILED, error)
+      // XXX set status to FAILED
       continue
     }
 
@@ -367,5 +368,11 @@ async function aliveLoop () {
   }
 }
 
-main()
-aliveLoop()
+if (require.main === module) {
+  main()
+  aliveLoop()
+}
+
+module.exports = {
+  convertTimeseriesArrayToCsv
+}
