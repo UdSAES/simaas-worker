@@ -41,27 +41,29 @@ const ALIVE_EVENT_WAIT_TIME = parseInt(process.env.ALIVE_EVENT_WAIT_TIME) || 360
 
 log.any('configuration data successfully loaded', 300020)
 
-if (!_.isString(QUEUE_ORIGIN) || QUEUE_ORIGIN.length < 1) {
-  log.any('QUEUE_ORIGIN is ' + QUEUE_ORIGIN + ' but must be string of length 1 or longer', 600020)
-  process.exit(1)
-}
+function checkIfConfigIsValid () {
+  if (!_.isString(QUEUE_ORIGIN) || QUEUE_ORIGIN.length < 1) {
+    log.any('QUEUE_ORIGIN is ' + QUEUE_ORIGIN + ' but must be string of length 1 or longer', 600020)
+    process.exit(1)
+  }
 
-if (!_.isString(MODEL_BASE_PATH)) {
-  log.any('MODEL_BASE_PATH is ' + MODEL_BASE_PATH + ' but must be a string', 600020)
-  process.exit(1)
-}
+  if (!_.isString(MODEL_BASE_PATH)) {
+    log.any('MODEL_BASE_PATH is ' + MODEL_BASE_PATH + ' but must be a string', 600020)
+    process.exit(1)
+  }
 
-if (!_.isInteger(WAIT_TIME) || WAIT_TIME < 1) {
-  log.any('WAIT_TIME is ' + WAIT_TIME + ' but must be a positive integer value', 600020)
-  process.exit(1)
-}
+  if (!_.isInteger(WAIT_TIME) || WAIT_TIME < 1) {
+    log.any('WAIT_TIME is ' + WAIT_TIME + ' but must be a positive integer value', 600020)
+    process.exit(1)
+  }
 
-if (!(_.isNumber(ALIVE_EVENT_WAIT_TIME) && ALIVE_EVENT_WAIT_TIME > 0)) {
-  log.any('ALIVE_EVENT_WAIT_TIME is ' + ALIVE_EVENT_WAIT_TIME + ' but must be positive integer number larger than 0', 600020)
-  process.exit(1)
-}
+  if (!(_.isNumber(ALIVE_EVENT_WAIT_TIME) && ALIVE_EVENT_WAIT_TIME > 0)) {
+    log.any('ALIVE_EVENT_WAIT_TIME is ' + ALIVE_EVENT_WAIT_TIME + ' but must be positive integer number larger than 0', 600020)
+    process.exit(1)
+  }
 
-log.any('configuration successfully done', 300030)
+  log.any('configuration successfully done', 300030)
+}
 
 const COLUMN_SEPARATOR = ','
 const EVENTS = {
@@ -256,6 +258,8 @@ async function processSimulationTask (task) {
 }
 
 async function main () {
+  checkIfConfigIsValid()
+
   log.any('service starts normal operation', 300040)
   let isPullingTaskError = false
   while (true) {
