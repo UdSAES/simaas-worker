@@ -1,1 +1,9 @@
+# Ignore Python Bytecode Files
+*.py[cod]     # Will match .pyc, .pyo and .pyd files.
+__pycache__/  # Exclude the whole folder
+
+# Ignore Node.js-Modules
 node_modules
+
+# Ignore directory ./local
+local/
