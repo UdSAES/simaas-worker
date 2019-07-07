@@ -16,6 +16,13 @@
         ]
     },
     "default": {
+        "loguru": {
+            "hashes": [
+                "sha256:85408b9552adb9a795af102221c7517f35c8b56ffe7b43d98d37e883283854de",
+                "sha256:f2a0fa92f334d37a13351aa36ab18e8039649a3741836b4b6d8b8bce7e8457ac"
+            ],
+            "index": "pypi",
+            "version": "==0.3.0"
         }
     },
     "develop": {}
