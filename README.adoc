@@ -1,0 +1,12 @@
+# SIMaaS-Worker
+:simaas_api: https://github.com/UdSAES/simaas_api
+:celery: http://docs.celeryproject.org/en/latest/index.html
+
+This repository contains the source code that actually implements the functionality offered _as a Service_ via the {simaas_api}[SIMaaS-API] developed at the https://www.uni-saarland.de/en/lehrstuhl/frey/start.html[chair of automation- and energy systems] at Saarland university (UdS AES).
+
+More specifically, its capability is to execute simulations based on https://fmi-standard.org/[Functional Mock-up Units (FMUs)] using https://github.com/CATIA-Systems/FMPy[FMPy], a Python library developed at Dassault Systèmes.
+
+Requests for performing simulations are distributed to the worker instances by means of a distributed task queue implemented using {celery}[Celery]. Consequently, the available computing power can easily be increased both by allowing one instance to use more cores and by starting more instances in a cluster.
+
+Initially, a custom-made task queue was used instead. See xref:./docs/versions.adoc[./docs/versions.adoc] for the full version history and more information.
+
