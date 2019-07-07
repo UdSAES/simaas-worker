@@ -20,3 +20,5 @@ This software is versioned using https://semver.org/spec/v2.0.0.html[Semantic Ve
 
 == Release Notes
 Details about each release and the features being worked on in reverse order (most recent first).
+
+include::v0.1.0.adoc[leveloffset=+1]
