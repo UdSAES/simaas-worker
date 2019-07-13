@@ -63,3 +63,7 @@ logger.add(
     serialize=True
 )
 
+
+def main():
+
+    pass
