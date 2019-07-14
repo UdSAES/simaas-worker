@@ -12,7 +12,7 @@ from .worker import timeseries_dict_to_pd_series
 from .worker import prepare_bc_for_fmpy
 
 
-class TestPreProcessing(object):
+class DataContainer(object):
     t2m_ts_obj = dict(
         label='temperature',
         unit='K',
@@ -57,19 +57,23 @@ class TestPreProcessing(object):
         ]
     )
 
-    def test_dict_2_pd_series(self):
-        s = timeseries_dict_to_pd_series(self.t2m_ts_obj)
 
-        assert s.equals(self.t2m_pd_series)
+class TestPreProcessing(object):
+    d = DataContainer()
+
+    def test_dict_2_pd_series(self):
+        s = timeseries_dict_to_pd_series(self.d.t2m_ts_obj)
+
+        assert s.equals(self.d.t2m_pd_series)
 
     def test_bc_for_fmpy(self):
         signals = prepare_bc_for_fmpy(
-            [self.t2m_pd_series, self.aswdir_s_pd_series],
-            units=[self.t2m_ts_obj['unit'], self.aswdir_s_ts_obj['unit']]
+            [self.d.t2m_pd_series, self.d.aswdir_s_pd_series],
+            units=[self.d.t2m_ts_obj['unit'], self.d.aswdir_s_ts_obj['unit']]
         )
 
 
-        assert np.array_equal(self.bc, signals) is True
+        assert np.array_equal(self.d.bc, signals) is True
 
 class TestSimulateFMU2forCS(object):
     test_data_base_path = os.path.join(
