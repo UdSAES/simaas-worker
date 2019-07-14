@@ -53,3 +53,9 @@ def prepare_bc_for_fmpy(ts, units=None):
     ndarray = np.array(df.to_records())
 
     return ndarray
+
+
+def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
+    """Simulate FMU 2.0 for CS, return result as pd.DataFrame."""
+
+    pass

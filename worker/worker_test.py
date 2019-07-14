@@ -10,6 +10,7 @@ import numpy as np
 from .worker import FILLNA
 from .worker import timeseries_dict_to_pd_series
 from .worker import prepare_bc_for_fmpy
+from .worker import simulate_fmu2_cs
 
 
 class DataContainer(object):
@@ -44,6 +45,22 @@ class DataContainer(object):
         name='directHorizontalIrradiance'
     )
 
+    aswdifd_s_ts_obj = dict(
+        label='diffuseHorizontalIrradiance',
+        unit='W/m.2',
+        timeseries=[
+            [1542412800000, 0.0],
+            [1542416400000, 0.0],
+            [1542420000000, 0.0]
+        ]
+    )
+
+    aswdifd_s_pd_series = pd.Series(
+        [0.0, 0.0, 0.0],
+        index=[1542412800000, 1542416400000, 1542420000000],
+        name='diffuseHorizontalIrradiance'
+    )
+
     bc = np.array(
         [
             (0.0, 274.6336669921875, 0.0),
@@ -76,6 +93,8 @@ class TestPreProcessing(object):
         assert np.array_equal(self.d.bc, signals) is True
 
 class TestSimulateFMU2forCS(object):
+    d = DataContainer()
+
     test_data_base_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), '..', 'tests', 'data'
     )
@@ -86,13 +105,59 @@ class TestSimulateFMU2forCS(object):
         'model_instance.fmu'
     )
 
+    options = dict(
+        simulationParameters=dict(
+            startTime=1542412800000,
+            stopTime=1542420000000,
+            outputInterval=3600
+        ),
+        inputTimeseries=[
+            d.t2m_ts_obj,
+            d.aswdir_s_ts_obj,
+            d.aswdifd_s_ts_obj
+        ]
+    )
+
+    def _pd_df_equal(self, a, b):
+        try:
+            pd.testing.assert_frame_equal(
+                a,
+                b,
+                check_dtype=True,
+                check_index_type='equiv',
+                check_column_type='equiv',
+                check_frame_type=True,
+                check_less_precise=False,
+                check_names=True,
+                check_exact=False
+            )
+        except AssertionError:
+            return False
+        return True
+
+    # Verify that FMU used for testing is available
     def test_fmu_exists(self):
         assert os.path.isfile(self.fmu_filepath)
 
+    # Function MUST raise an error if the FMU does not exist
     @pytest.mark.skip
     def test_fmu_does_not_exist(self):
         pass
 
-    @pytest.mark.skip
+    # Actual simulation result MUST match expected result
     def test_successful_simulation(self):
+        expected = pd.DataFrame(
+            data={'powerDC': [0.0, 0.0, 0.0], 'totalEnergyDC': [0.0, 0.0, 0.0]},
+            index=[1542412800000, 1542416400000, 1542420000000]
+        )
+        expected.set_index(pd.DatetimeIndex(expected.index*10**6), inplace=True)
+        expected.index.name = 'time'
+
+        df = simulate_fmu2_cs(self.fmu_filepath, self.options, req_id=None)
+
+        assert self._pd_df_equal(df, expected) is True
+
+    # Logs MUST match the agreed upon schema
+    @pytest.mark.skip
+    def test_log_format(self):
         pass
