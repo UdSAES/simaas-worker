@@ -2,10 +2,14 @@
 # -*- coding: utf8 -*-
 
 import os
+
 import pytest
 import pandas as pd
+import numpy as np
 
+from .worker import FILLNA
 from .worker import timeseries_dict_to_pd_series
+from .worker import prepare_bc_for_fmpy
 
 
 class TestPreProcessing(object):
@@ -25,11 +29,47 @@ class TestPreProcessing(object):
         name='temperature'
     )
 
+    aswdir_s_ts_obj = dict(
+        label='directHorizontalIrradiance',
+        unit='W/m.2',
+        timeseries=[
+            [1542412800000, 0.0],
+            [1542420000000, 0.0]
+        ]
+    )
+
+    aswdir_s_pd_series = pd.Series(
+        [0.0, 0.0],
+        index=[1542412800000, 1542420000000],
+        name='directHorizontalIrradiance'
+    )
+
+    bc = np.array(
+        [
+            (0.0, 274.6336669921875, 0.0),
+            (3600.0, 274.4828796386719, FILLNA),  # NaN replaced by constant value
+            (7200.0, 274.01922607421875, 0.0)
+        ],
+        dtype=[
+            ('time', np.double),
+            ('temperature', np.double),
+            ('directHorizontalIrradiance', np.double)
+        ]
+    )
+
     def test_dict_2_pd_series(self):
         s = timeseries_dict_to_pd_series(self.t2m_ts_obj)
 
         assert s.equals(self.t2m_pd_series)
 
+    def test_bc_for_fmpy(self):
+        signals = prepare_bc_for_fmpy(
+            [self.t2m_pd_series, self.aswdir_s_pd_series],
+            units=[self.t2m_ts_obj['unit'], self.aswdir_s_ts_obj['unit']]
+        )
+
+
+        assert np.array_equal(self.bc, signals) is True
 
 class TestSimulateFMU2forCS(object):
     test_data_base_path = os.path.join(

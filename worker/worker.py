@@ -5,6 +5,9 @@ import pandas as pd
 from loguru import logger
 
 
+FILLNA = 0
+
+
 def timeseries_dict_to_pd_series(ts_dict):
     """
     Turn timeseries object v1.3.0 into pd.Series.
@@ -14,3 +17,9 @@ def timeseries_dict_to_pd_series(ts_dict):
     The data is not changed, just represented differently!
     """
 
+
+
+def prepare_bc_for_fmpy(ts, units=None):
+    """Turn array of pd.Series into correctly shaped np.ndarray."""
+
+    pass
