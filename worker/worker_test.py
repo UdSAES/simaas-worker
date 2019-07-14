@@ -3,6 +3,33 @@
 
 import os
 import pytest
+import pandas as pd
+
+from .worker import timeseries_dict_to_pd_series
+
+
+class TestPreProcessing(object):
+
+    def test_dict_2_pd_series(self):
+        ts_obj = dict(
+            label='temperature',
+            unit='K',
+            timeseries=[
+                [1542412800000, 274.6336669921875],
+                [1542416400000, 274.4828796386719],
+                [1542420000000, 274.01922607421875]
+            ]
+        )
+
+        ts_pd_series = pd.Series(
+            [274.6336669921875, 274.4828796386719, 274.01922607421875],
+            index=[1542412800000, 1542416400000, 1542420000000],
+            name='temperature'
+        )
+
+        s = timeseries_dict_to_pd_series(ts_obj)
+
+        assert s.equals(ts_pd_series)
 
 
 class TestSimulateFMU2forCS(object):
