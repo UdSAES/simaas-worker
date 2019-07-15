@@ -1,6 +1,8 @@
 #! /usr/bin/python3
 # -*- coding: utf8 -*-
 
+"""Run unit tests for actual functionality."""
+
 import os
 
 import pytest
@@ -92,6 +94,7 @@ class TestPreProcessing(object):
 
         assert np.array_equal(self.d.bc, signals) is True
 
+
 class TestSimulateFMU2forCS(object):
     d = DataContainer()
 
@@ -161,3 +164,13 @@ class TestSimulateFMU2forCS(object):
     @pytest.mark.skip
     def test_log_format(self):
         pass
+    #     simulate_fmu2_cs(fmu_filepath, {})
+    #     # https://docs.pytest.org/en/latest/
+    #     # -- logging.html
+    #     # -- capture.html#accessing-captured-output-from-a-test-function
+    #     captured = capsys.readouterr()
+    #
+    #     for log in captured.out.split('\n'):
+    #         if log != '':
+    #             log_obj = json.loads(log)
+    #             print(log_obj['msg'])
