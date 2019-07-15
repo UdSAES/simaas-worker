@@ -7,3 +7,7 @@ node_modules
 
 # Ignore directory ./local
 local/
+
+# Ignore fmpy-status indicators
+status.
+success.
