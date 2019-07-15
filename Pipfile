@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 loguru = "*"
+numpy = "*"
+pathlib = "*"
+fmpy = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.6"

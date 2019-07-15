@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 # -*- coding: utf8 -*-
 
+import fmpy
 import numpy as np
 import pandas as pd
 from loguru import logger
@@ -58,4 +59,37 @@ def prepare_bc_for_fmpy(ts, units=None):
 def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     """Simulate FMU 2.0 for CS, return result as pd.DataFrame."""
 
-    pass
+    # Prepare input data
+    input_timeseries = []
+    input_units = []
+    for ts_obj in options['inputTimeseries']:
+        input_timeseries.append(timeseries_dict_to_pd_series(ts_obj))
+        input_units.append(ts_obj['unit'])
+    start_time = options['simulationParameters']['startTime']
+    stop_time = options['simulationParameters']['stopTime']
+    relative_tolerance = 10e-4
+    output_interval = options['simulationParameters']['outputInterval']
+    input_ts = prepare_bc_for_fmpy(input_timeseries, input_units)
+    start_values = dict(epochOffset=start_time/1000)
+
+    # Execute simulation
+    sim_result = fmpy.simulate_fmu(
+        fmu_filepath,
+        validate=True,
+        start_time=start_time,
+        stop_time=stop_time,
+        relative_tolerance=relative_tolerance,
+        output_interval=output_interval,
+        start_values=start_values,
+        apply_default_start_values=False,
+        input=input_ts,
+        output=None
+    )
+
+    # Return relevant data as pd.DataFrame
+    df = pd.DataFrame(sim_result)
+    df.set_index(pd.DatetimeIndex(df['time']*10**6), inplace=True)
+    del df['time']
+    df = df.resample(str(output_interval) + 'S').asfreq()
+
+    return df
