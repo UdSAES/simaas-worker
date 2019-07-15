@@ -22,9 +22,9 @@ def timeseries_dict_to_pd_series(ts_dict):
     timestamps = []
     values = []
 
-    for array in ts_dict['timeseries']:
-        timestamps.append(array[0])
-        values.append(array[1])
+    for obj in ts_dict['timeseries']:
+        timestamps.append(obj['timestamp'])
+        values.append(obj['value'])
 
     s = pd.Series(values, index=timestamps, name=ts_dict['label'])
     s.sort_index(inplace=True)
