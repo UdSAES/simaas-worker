@@ -9,9 +9,9 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from .worker import timeseries_dict_to_pd_series
-from .worker import prepare_bc_for_fmpy
-from .worker import simulate_fmu2_cs
+from worker import timeseries_dict_to_pd_series
+from worker import prepare_bc_for_fmpy
+from worker import simulate_fmu2_cs
 
 
 class TestPreProcessing(object):

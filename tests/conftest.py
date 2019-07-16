@@ -1,19 +1,27 @@
 #! /usr/bin/python3
 # -*- coding: utf8 -*-
 
-"""Provide test fixtures for unit tests."""
+"""Provide test fixtures for unit tests.
+
+Also, modify PATH to resolve references properly; see
+https://docs.python-guide.org/writing/structure/#test-suite
+for an explanation.
+"""
 
 import os
+import sys
+
 
 import pytest
 import numpy as np
 import pandas as pd
 
-from .worker import FILLNA
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import worker  # noqa
 
 
 def mwe():
-    """Provide minimal data set for testing the simulation a PV plant."""
+    """Provide minimal data set for testing the simulation of a PV plant."""
 
     df_successful_sim = pd.DataFrame(
         data={'powerDC': [0.0, 0.0, 0.0], 'totalEnergyDC': [0.0, 0.0, 0.0]},
@@ -86,7 +94,7 @@ def mwe():
             prepare_bc_for_fmpy=np.array(
                 [
                     (0.0, 274.6336669921875, 0.0, 0.0),
-                    (3600.0, 274.4828796386719, FILLNA, 0.0),  # NaN replaced by constant value
+                    (3600.0, 274.4828796386719, worker.FILLNA, 0.0),
                     (7200.0, 274.01922607421875, 0.0, 0.0)
                 ],
                 dtype=[
