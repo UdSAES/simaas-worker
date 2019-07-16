@@ -70,6 +70,28 @@ logger.add(
 )
 
 
+# Run module
 def main():
 
-    pass
+    test_data_base_path = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), '..', 'tests', 'data'
+    )
+
+    model_instance_id = 'c02f1f12-966d-4eab-9f21-dcf265ceac71'
+
+    fmu_filepath = os.path.join(
+        test_data_base_path,
+        model_instance_id,
+        'model_instance.fmu'
+    )
+
+    req_body_json_file = os.path.join(
+        test_data_base_path, model_instance_id,
+        '20181117_req_body_saarbruecken.json'
+    )
+    with open(req_body_json_file) as fp:
+        req_body = json.load(fp)
+
+    result = simulate_fmu2_cs(fmu_filepath, req_body, req_id=None)
+
+    print(result)

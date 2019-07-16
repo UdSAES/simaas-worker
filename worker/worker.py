@@ -73,23 +73,24 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     start_values = dict(epochOffset=start_time/1000)
 
     # Execute simulation
+    # NOTE: inside the FMU, time is represented in seconds starting at zero!
     sim_result = fmpy.simulate_fmu(
         fmu_filepath,
         validate=True,
-        start_time=start_time,
-        stop_time=stop_time,
+        start_time=0,
+        stop_time=int((stop_time - start_time)/1000),
         relative_tolerance=relative_tolerance,
         output_interval=output_interval,
         start_values=start_values,
-        apply_default_start_values=False,
+        apply_default_start_values=True,
         input=input_ts,
         output=None
     )
 
-    # Return relevant data as pd.DataFrame
+    # Return simulation result as pd.DataFrame
     df = pd.DataFrame(sim_result)
-    df.set_index(pd.DatetimeIndex(df['time']*10**6), inplace=True)
+    df['time'] = df['time'] + start_time/1000
+    df.set_index(pd.DatetimeIndex(df['time']*10**9), inplace=True)
     del df['time']
-    df = df.resample(str(output_interval) + 'S').asfreq()
 
     return df
