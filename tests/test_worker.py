@@ -16,30 +16,36 @@ from worker import simulate_fmu2_cs
 
 class TestPreProcessing(object):
     def test_dict_2_pd_series(self, ctx):
-        req_body = ctx['data']['mq_payload']['request']['body']
-        input = req_body['inputTimeseries'][0]
-        desired = ctx['expectations']['timeseries_dict_to_pd_series']['t2m']
-        actual = timeseries_dict_to_pd_series(input)
+        if 'timeseries_dict_to_pd_series' in ctx['expectations']:
+            req_body = ctx['data']['mq_payload']['request']['body']
+            input = req_body['inputTimeseries'][0]
+            desired = ctx['expectations']['timeseries_dict_to_pd_series']['t2m']
+            actual = timeseries_dict_to_pd_series(input)
 
-        assert actual.equals(desired)
+            assert actual.equals(desired)
+        else:
+            pytest.skip('skipped because no expectation was specified')
 
     def test_bc_for_fmpy(self, ctx):
-        req_body = ctx['data']['mq_payload']['request']['body']
-        desired = ctx['expectations']['prepare_bc_for_fmpy']
-        actual = prepare_bc_for_fmpy(
-            [
-                ctx['expectations']['timeseries_dict_to_pd_series']['t2m'],
-                ctx['expectations']['timeseries_dict_to_pd_series']['aswdir_s'],
-                ctx['expectations']['timeseries_dict_to_pd_series']['aswdifd_s'],
-            ],
-            units=[
-                req_body['inputTimeseries'][0]['unit'],
-                req_body['inputTimeseries'][1]['unit'],
-                req_body['inputTimeseries'][2]['unit']
-            ]
-        )
+        if 'prepare_bc_for_fmpy' in ctx['expectations']:
+            req_body = ctx['data']['mq_payload']['request']['body']
+            desired = ctx['expectations']['prepare_bc_for_fmpy']
+            actual = prepare_bc_for_fmpy(
+                [
+                    timeseries_dict_to_pd_series(req_body['inputTimeseries'][0]),
+                    timeseries_dict_to_pd_series(req_body['inputTimeseries'][1]),
+                    timeseries_dict_to_pd_series(req_body['inputTimeseries'][2]),
+                ],
+                units=[
+                    req_body['inputTimeseries'][0]['unit'],
+                    req_body['inputTimeseries'][1]['unit'],
+                    req_body['inputTimeseries'][2]['unit']
+                ]
+            )
 
-        assert np.array_equal(actual, desired) is True
+            assert np.array_equal(actual, desired) is True
+        else:
+            pytest.skip('skipped because no expectation was specified')
 
 
 class TestSimulateFMU2forCS(object):
@@ -72,13 +78,16 @@ class TestSimulateFMU2forCS(object):
 
     # Actual simulation result MUST match expected result
     def test_successful_simulation(self, ctx, fmu_filepath):
-        desired = ctx['expectations']['simulate_fmu2_cs']
-        options = ctx['data']['mq_payload']['request']['body']
-        req_id = ctx['data']['mq_payload']['request']['id']
+        if 'simulate_fmu2_cs' in ctx['expectations']:
+            desired = ctx['expectations']['simulate_fmu2_cs']
+            options = ctx['data']['mq_payload']['request']['body']
+            req_id = ctx['data']['mq_payload']['request']['id']
 
-        actual = simulate_fmu2_cs(fmu_filepath, options, req_id)
+            actual = simulate_fmu2_cs(fmu_filepath, options, req_id)
 
-        assert self._pd_df_equal(actual, desired) is True
+            assert self._pd_df_equal(actual, desired) is True
+        else:
+            pytest.skip('skipped because no expectation was specified')
 
     # Logs MUST match the agreed upon schema
     @pytest.mark.skip
