@@ -27,12 +27,15 @@ test_data_base_path = os.path.normpath(
 def mwe():
     """Provide minimal data set for testing the simulation of a PV plant."""
 
-    df_successful_sim = pd.DataFrame(
+    sim_result_df = pd.DataFrame(
         data={'powerDC': [0.0, 0.0, 0.0], 'totalEnergyDC': [0.0, 0.0, 0.0]},
         index=[1542412800000, 1542416400000, 1542420000000]
     )
-    df_successful_sim.set_index(pd.DatetimeIndex(df_successful_sim.index*10**6), inplace=True)
-    df_successful_sim.index.name = 'time'
+    sim_result_df.set_index(
+        pd.DatetimeIndex(sim_result_df.index*10**6).tz_localize('utc'),
+        inplace=True
+    )
+    sim_result_df.index.name = 'time'
 
     context = dict(
         data=dict(
@@ -108,7 +111,7 @@ def mwe():
                     ('diffuseHorizontalIrradiance', np.double)
                 ]
             ),
-            simulate_fmu2_cs=df_successful_sim
+            simulate_fmu2_cs=sim_result_df
         )
     )
 
@@ -140,7 +143,10 @@ def pv_20181117_15kWp_saarbruecken():
         sim_result_df['time'] % req_body['simulationParameters']['outputInterval'] == 0
     ]  # drop values at intermediate points in time (i.e. not on dense output grid)
     sim_result_df.drop_duplicates('time', inplace=True)  # drop duplicates on index
-    sim_result_df.set_index(pd.DatetimeIndex(sim_result_df['time']*10**6), inplace=True)
+    sim_result_df.set_index(
+        pd.DatetimeIndex(sim_result_df['time']*10**6).tz_localize('utc'),
+        inplace=True
+    )
     del sim_result_df['time']
 
     # Populate context-object

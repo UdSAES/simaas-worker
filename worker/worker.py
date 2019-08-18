@@ -67,7 +67,7 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
         input_units.append(ts_obj['unit'])
     start_time = options['simulationParameters']['startTime']
     stop_time = options['simulationParameters']['stopTime']
-    relative_tolerance = 10e-4
+    relative_tolerance = 10e-5
     output_interval = options['simulationParameters']['outputInterval']
     input_ts = prepare_bc_for_fmpy(input_timeseries, input_units)
     start_values = dict(epochOffset=start_time/1000)
@@ -89,8 +89,8 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
 
     # Return simulation result as pd.DataFrame
     df = pd.DataFrame(sim_result)
-    df['time'] = df['time'] + start_time/1000
-    df.set_index(pd.DatetimeIndex(df['time']*10**9), inplace=True)
+    df['time'] = df['time']*1000 + start_time
+    df.set_index(pd.DatetimeIndex(df['time']*10**6).tz_localize('utc'), inplace=True)
     del df['time']
 
     return df
