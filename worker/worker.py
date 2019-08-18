@@ -36,9 +36,10 @@ def prepare_bc_for_fmpy(ts, units=None):
     """Turn array of pd.Series into correctly shaped np.ndarray."""
 
     df = pd.DataFrame(ts[0])
+    df = df.join(ts[1:], how='outer')  # use how='outer' to not drop rows with missing values
 
-    for series in ts[1:]:
-        df = df.join(series)
+    # Deal with missing values explicitly
+    df.fillna(value=FILLNA, inplace=True)
 
     # Ensure that seconds relative to offset are used as index
     offset = df.index.min()
@@ -46,9 +47,6 @@ def prepare_bc_for_fmpy(ts, units=None):
     df['time_rel'] = df['time_rel'].apply(lambda x: float((x - offset)/1000))
     df.set_index('time_rel', inplace=True)
     df.index.rename('time', inplace=True)
-
-    # Replace NaN with constant value
-    df.fillna(value=FILLNA, inplace=True)
 
     # Transform into np.ndarray with correct dtypes
     ndarray = np.array(df.to_records())
@@ -73,7 +71,7 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     start_values = dict(epochOffset=start_time/1000)
 
     # Execute simulation
-    # NOTE: inside the FMU, time is represented in seconds starting at zero!
+    # INFO inside the FMU, time is represented in seconds starting at zero!
     sim_result = fmpy.simulate_fmu(
         fmu_filepath,
         validate=True,

@@ -9,10 +9,10 @@ import socket
 
 from loguru import logger
 
-from .worker import FILLNA
-from .worker import timeseries_dict_to_pd_series
-from .worker import prepare_bc_for_fmpy
-from .worker import simulate_fmu2_cs
+from .worker import FILLNA  # noqa
+from .worker import timeseries_dict_to_pd_series  # noqa
+from .worker import prepare_bc_for_fmpy  # noqa
+from .worker import simulate_fmu2_cs  # noqa
 
 
 # Configure logging
@@ -71,6 +71,7 @@ logger.add(
 
 
 # Run module
+@logger.catch
 def main():
 
     test_data_base_path = os.path.join(

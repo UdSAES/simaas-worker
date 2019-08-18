@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-import worker  # noqa
+import worker  # noqa -- import has to happen _after_ modifying PATH
 
 test_data_base_path = os.path.normpath(
     os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'tests', 'data')
