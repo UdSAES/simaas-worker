@@ -10,7 +10,7 @@ for an explanation.
 
 import os
 import sys
-
+import json
 
 import pytest
 import numpy as np
@@ -18,6 +18,10 @@ import pandas as pd
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import worker  # noqa
+
+test_data_base_path = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'tests', 'data')
+)
 
 
 def mwe():
@@ -111,6 +115,52 @@ def mwe():
     return context
 
 
+def pv_20181117_15kWp_saarbruecken():
+    """Provide data set for 15kWp PV plant on 20181117 at Saarland Uni."""
+    model_instance_id = 'c02f1f12-966d-4eab-9f21-dcf265ceac71'
+    req_body_json_file = os.path.join(
+        test_data_base_path, model_instance_id,
+        '20181117_req_body_saarbruecken.json'
+    )
+    with open(req_body_json_file) as fp:
+        req_body = json.load(fp)
+
+    # Load results from .csv-file and index by datetime; values only at n*output_interval
+    sim_result_csv = os.path.join(
+        test_data_base_path, model_instance_id,
+        '20181117_dymola2019_result_powerDC_totalEnergyDC_900s.csv'
+    )
+    sim_result_df = pd.read_csv(
+        sim_result_csv, sep=',', header=0, names=['time', 'powerDC', 'totalEnergyDC'], decimal='.'
+    )
+    sim_result_df['time'] = sim_result_df['time'].apply(
+        lambda x: req_body['simulationParameters']['startTime'] + x*1000
+    )  # transform relative time in seconds to epoch in milliseconds
+    sim_result_df = sim_result_df[
+        sim_result_df['time'] % req_body['simulationParameters']['outputInterval'] == 0
+    ]  # drop values at intermediate points in time (i.e. not on dense output grid)
+    sim_result_df.drop_duplicates('time', inplace=True)  # drop duplicates on index
+    sim_result_df.set_index(pd.DatetimeIndex(sim_result_df['time']*10**6), inplace=True)
+    del sim_result_df['time']
+
+    # Populate context-object
+    context = dict(
+        data=dict(
+            mq_payload=dict(
+                request=dict(
+                    id='3dcf3a45-36b7-4c2a-b1f0-473721fbec95',
+                    body=req_body
+                )
+            )
+        ),
+        expectations=dict(
+            simulate_fmu2_cs=sim_result_df
+        )
+    )
+
+    return context
+
+
 @pytest.fixture(scope='session')
 def ctx():
     """Provide context for tests depending on ENVVAR `TEST_DATA`."""
@@ -118,15 +168,13 @@ def ctx():
     choice = os.environ['TEST_DATA'] if 'TEST_DATA' in os.environ else 'mwe'
 
     return {
-        'mwe': mwe()
+        'mwe': mwe(),
+        '20181117': pv_20181117_15kWp_saarbruecken()
     }[choice]
 
 
 @pytest.fixture
 def fmu_filepath(ctx):
-    test_data_base_path = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), '..', 'tests', 'data'
-    )
     fmu_filepath = os.path.join(
         test_data_base_path,
         ctx['data']['mq_payload']['request']['body']['modelInstanceID'],
