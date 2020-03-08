@@ -23,6 +23,7 @@ let modulesLoaded = false
 
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
+const execAsync = promisify(require('child_process').exec)
 const fs = require('fs-extra')
 const request = require('request-promise-native')
 const tmp = require('tmp-promise')
@@ -211,6 +212,14 @@ async function processSimulationTask (task) {
   const modelInstanceId = task['model_instance_id']
   const input = task['input_timeseries']
   const simulationParameters = task['simulation_parameters']
+  const startValues = task['start_values']
+
+  // assemble string of start values to be passed to fmpy-CLI
+  let startValuesString = ''
+  _.forEach(startValues, (value, key) => {
+    startValuesString += ` ${key} ${value}`  // this is a serious security vulnerability!!
+  })
+  log.debug(startValuesString)
 
   // create model file
   const modelFile = await tmp.file()
@@ -235,18 +244,28 @@ async function processSimulationTask (task) {
   // const modelInfo = parseFMPYInfoOutput(infoResult.stdout) // XXX broken
 
   // run simulation
+  let fmpyArguments = [
+    'simulate', modelFile.path,
+    '--output-file ' + outputFile.path,
+    '--input-file ' + inputFile.path,
+    '--start-time ' + 0,
+    '--stop-time ' + parseInt((simulationParameters['stopTime'] - simulationParameters['startTime']) / 1000),
+    '--output-interval ' + simulationParameters['outputInterval'],
+    '--apply-default-start-values'
+  ]
+
+  if (!_.isEmpty(startValuesString)){
+    fmpyArguments = _.concat(fmpyArguments, [`--start-values${startValuesString}`])
+  }
+  log.debug(fmpyArguments)
+
+  const fmpyCommand = await _.join(_.concat(['fmpy'], fmpyArguments), ' ')
+  log.debug(fmpyCommand)
+
   const {
     stdout,
     stderr
-  } = await execFile('fmpy', [
-    'simulate', modelFile.path,
-    '--output-file=' + outputFile.path,
-    '--input-file=' + inputFile.path,
-    '--start-time=' + 0,
-    '--stop-time=' + parseInt((simulationParameters['stopTime'] - simulationParameters['startTime']) / 1000),
-    '--output-interval=' + simulationParameters['outputInterval']
-  ]
-  )
+  } = await execAsync(fmpyCommand)
   log.debug({stdout, stderr})
 
   const output = await fs.readFile(outputFile.path, { encoding: 'utf8' })
