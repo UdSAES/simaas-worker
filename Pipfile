@@ -6,6 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+lxml = "==4.3.4"
+numpy = "==1.16.4"
 fmpy = "*"
 
 [requires]
