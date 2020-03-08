@@ -189,9 +189,10 @@ function convertCsvToTimeseriesArray (csv, modelInfo, startTime) {
     }
     const timeseriesItem = {}
     timeseriesItem.label = heading
-    timeseriesItem.unit = _.find(modelInfo.variableDefinitions, (variableDefinition) => {
-      return variableDefinition.name === heading
-    }).unit
+    timeseriesItem.unit = 'unit'
+    // timeseriesItem.unit = _.find(modelInfo.variableDefinitions, (variableDefinition) => {
+    //   return variableDefinition.name === heading
+    // }).unit // FIXME depends on `parseFMPYInfoOutput`
 
     timeseriesItem.timeseries = _.map(columns[columnIndex], (value, rowIndex) => {
       return {
@@ -230,8 +231,8 @@ async function processSimulationTask (task) {
   const outputFile = await tmp.file()
 
   // get info about fmu
-  const infoResult = await execFile('fmpy', ['info', modelFile.path])
-  const modelInfo = parseFMPYInfoOutput(infoResult.stdout) // XXX broken
+  // const infoResult = await exec('fmpy', ['info', modelFile.path])
+  // const modelInfo = parseFMPYInfoOutput(infoResult.stdout) // XXX broken
 
   // run simulation
   const {
@@ -254,7 +255,7 @@ async function processSimulationTask (task) {
   inputFile.cleanup()
   modelFile.cleanup()
 
-  return { output: output, modelInfo: modelInfo }
+  return { output: output, modelInfo: {}}
 }
 
 async function main () {
