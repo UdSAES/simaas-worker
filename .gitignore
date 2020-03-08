@@ -1,1 +1,9 @@
+// Ignore Node.js modules
 node_modules
+
+// Ignore temporary files created by FMPy
+status.
+success.
+
+// Ignore specific files/directories
+local/
