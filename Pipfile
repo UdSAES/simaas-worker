@@ -1,20 +1,12 @@
 [[source]]
-
+name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-name = "pypi"
-
-
-[packages]
-
-pathlib = "*"
-"3f38040" = {file = "https://github.com/UdSAES/FMPy/archive/master.zip"}
-
 
 [dev-packages]
 
-
+[packages]
+fmpy = "*"
 
 [requires]
-
-python_version = "3.6"
+python_version = "3.7"
