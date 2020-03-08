@@ -123,39 +123,71 @@ function parseFMPYInfoOutput (infoOutput) {
   return result
 }
 
-function convertTimeseriesArrayToCsv (timeseriesArray) {
-  const columns = _.map(timeseriesArray, (timeseries) => {
-    return _.map(timeseries.timeseries, (te) => {
-      return te.value
+function makeTimeseriesArrayRelative(inputTimeseries, startTime){
+  _.forEach(inputTimeseries, function (tsObject) {
+    // Drop anything before `startTime` (in place)
+      _.remove(tsObject.timeseries, function (o) {
+      return o.timestamp < startTime
+    })
+
+    // Make time relative and convert milliseconds to seconds
+    const offset = startTime
+    tsObject.timeseries = _.map(tsObject.timeseries, function (timestampObject) {
+      return {
+        value: timestampObject.value,
+        timestamp: _.round((timestampObject.timestamp - offset) / 1000, 0)
+      }
     })
   })
 
-  // XXX the implementation below does not handle timeseries with different
-  // temporal resolution correctly!
-  // -- avoids introducing NaN iff first array is the shortest one
-  // -- will be unnecessary when implementing this in Python!
-  const timestamps = _.map(_.first(timeseriesArray).timeseries, (te) => {
-    return te.timestamp
-  })
+  return inputTimeseries
+}
 
-  columns.splice(0, 0, timestamps)
+function convertTimeseriesArrayToCsv (timeseriesArray, dropNaN) {
   const rows = []
 
-  // create headers
+  // Create header
   const headings = ['"time"']
   _.forEach(timeseriesArray, (timeseries) => {
     headings.push('"' + timeseries.label + '"')
   })
-
   rows.push(headings.join(COLUMN_SEPARATOR))
 
-  _.forEach(_.first(columns), (timestamp, index) => {
-    rows.push(_.map(columns, (c) => {
-      return c[index]
-    }).join(COLUMN_SEPARATOR))
+  // Find all timestamps in all timeseries
+  let listOfListOfTimestamps = []
+  _.forEach(timeseriesArray, (timeseries) => {
+    let timestamps = []
+    _.forEach(timeseries.timeseries, (obj) => {
+      timestamps.push(obj.timestamp)
+    })
+    listOfListOfTimestamps.push(timestamps)
   })
+  // console.log(listOfListOfTimestamps)
 
-  rows.splice(1, 0, rows[1])
+  // Only keep rows in which all quantities have a value if `dropNaN === true` else keep all
+  let commonTimestamps
+  if (dropNaN) {
+    commonTimestamps = _.intersection(...listOfListOfTimestamps)
+  } else {
+    commonTimestamps = _.union(...listOfListOfTimestamps)
+  }
+  // console.log(commonTimestamps)
+
+  // Create rows for all timestamps in `commonTimestamps`
+  _.forEach(commonTimestamps, (timestamp) => {
+    let row = [timestamp]
+    _.forEach(timeseriesArray, (timeseries) => {
+      let valueFound = false
+      _.forEach(timeseries.timeseries, (obj) => {
+        if (obj.timestamp === timestamp) {
+          valueFound = true
+          row.push(obj.value)
+        }
+      })
+      if (!valueFound) {row.push(null)}
+    })
+    rows.push(row)
+  })
 
   return rows.join('\n')
 }
@@ -210,7 +242,7 @@ function convertCsvToTimeseriesArray (csv, modelInfo, startTime) {
 
 async function processSimulationTask (task) {
   const modelInstanceId = task['model_instance_id']
-  const input = task['input_timeseries']
+  const inputTimeseries = task['input_timeseries']
   const simulationParameters = task['simulation_parameters']
   const startValues = task['start_values']
 
@@ -229,9 +261,16 @@ async function processSimulationTask (task) {
   await fs.writeFile(modelFile.path, modelFileContent, { encoding: null })
 
   // create tmp file for input
-  const inputFile = await tmp.file()
-  const csv = convertTimeseriesArrayToCsv(input)
+  const relativeTimeseriesArray = makeTimeseriesArrayRelative(
+    inputTimeseries,
+    simulationParameters['startTime']
+  )
 
+  const dropNaN = true
+  const csv = convertTimeseriesArrayToCsv(relativeTimeseriesArray, dropNaN)
+  log.debug(csv)
+
+  const inputFile = await tmp.file()
   await fs.writeFile(inputFile.path, csv, {
     encoding: 'utf8'
   })
