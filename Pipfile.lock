@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c2be93597063accadbf0418cb8e49d05381d75114ed37c947d28441498ab4e3b"
+            "sha256": "199e6f18bada9c082ff4a437d39c8f11c078a3ebe492d7947e410c0752c0d8e9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -17,18 +17,8 @@
     },
     "default": {
         "fmpy": {
-            "hashes": [
-                "sha256:1cb54616c01d6fd6453154e608267d97b42011b504b1624292bdb19fff60d0af"
-            ],
-            "index": "pypi",
-            "version": "==0.2.17"
-        },
-        "lark-parser": {
-            "hashes": [
-                "sha256:78d1e293a1fb06f10373552af95f70832e2bfe19aebfc3b142ea6c03b2ea0597",
-                "sha256:9d9ce33f36f749211194823a1175a76e2ccabccdfb86a196cefb967914122cd7"
-            ],
-            "version": "==0.8.2"
+            "git": "https://github.com/UdSAES/FMPy.git",
+            "ref": "7b3ca542a0c9e542b86187dcab5d40b25874ffc2"
         },
         "lxml": {
             "hashes": [
@@ -88,12 +78,6 @@
             ],
             "index": "pypi",
             "version": "==1.16.4"
-        },
-        "pathlib": {
-            "hashes": [
-                "sha256:6940718dfc3eff4258203ad5021090933e5c04707d5ca8cc9e73c94a7894ea9f"
-            ],
-            "version": "==1.0.1"
         }
     },
     "develop": {}

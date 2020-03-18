@@ -8,7 +8,7 @@ verify_ssl = true
 [packages]
 lxml = "==4.3.4"
 numpy = "==1.16.4"
-fmpy = "*"
+fmpy = {git = "https://github.com/UdSAES/FMPy.git",ref = "hotfix/issue89"}
 
 [requires]
 python_version = "3.7"
