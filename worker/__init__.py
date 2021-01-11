@@ -52,7 +52,9 @@ def sink_JSON_stdout_designetz(message):
 
 
 logger.remove()
-logger.configure(
+log_level = os.getenv("SIMWORKER_LOG_LEVEL", "INFO")
+if os.getenv("SIMWORKER_LOG_STRUCTURED", "true") is "true":
+    logger.configure(
         levels=[
             dict(name='TRACE', no=10),
             dict(name='DEBUG', no=20),
@@ -63,11 +65,16 @@ logger.configure(
             dict(name='CRITICAL', no=60)
         ]
     )
-logger.add(
-    sink_JSON_stdout_designetz,
-    level=os.environ['LOG_LEVEL'] if 'LOG_LEVEL' in os.environ else 'INFO',
-    serialize=True
-)
+
+    logger.add(
+        sink_JSON_stdout_designetz,
+        level=log_level,
+        serialize=True
+    )
+else:
+    logger.add(sys.stdout, level=log_level, diagnose=True, backtrace=False)
+
+
 
 
 # Run module
