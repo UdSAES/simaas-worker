@@ -57,6 +57,11 @@ def prepare_bc_for_fmpy(ts, units=None):
 def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     """Simulate FMU 2.0 for CS, return result as pd.DataFrame."""
 
+    if req_id is not None:
+        log = logger.bind(req_id=req_id)
+    else:
+        log = logger
+
     # Prepare input data
     input_timeseries = []
     input_units = []
