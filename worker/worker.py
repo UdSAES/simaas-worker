@@ -68,7 +68,7 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     relative_tolerance = 10e-5
     output_interval = options['simulationParameters']['outputInterval']
     input_ts = prepare_bc_for_fmpy(input_timeseries, input_units)
-    start_values = dict(epochOffset=start_time/1000)
+    # start_values = dict(epochOffset=start_time/1000)  # XXX assumes existence of variable!! BAD!
 
     # Execute simulation
     # INFO inside the FMU, time is represented in seconds starting at zero!
@@ -76,10 +76,11 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
         fmu_filepath,
         validate=True,
         start_time=0,
-        stop_time=int((stop_time - start_time)/1000),
+        stop_time=stop_time,
+        # stop_time=int((stop_time - start_time)/1000),
         relative_tolerance=relative_tolerance,
         output_interval=output_interval,
-        start_values=start_values,
+        # start_values=start_values,
         apply_default_start_values=True,
         input=input_ts,
         output=None
@@ -87,8 +88,9 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
 
     # Return simulation result as pd.DataFrame
     df = pd.DataFrame(sim_result)
-    df['time'] = df['time']*1000 + start_time
-    df.set_index(pd.DatetimeIndex(df['time']*10**6).tz_localize('utc'), inplace=True)
+    df.set_index(df['time'], inplace=True)
+    # df['time'] = df['time']*1000 + start_time
+    # df.set_index(pd.DatetimeIndex(df['time']*10**6).tz_localize('utc'), inplace=True)
     del df['time']
 
     return df

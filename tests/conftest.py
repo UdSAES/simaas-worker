@@ -118,6 +118,68 @@ def mwe():
     return context
 
 
+def fmpy_issue89():
+    """Ensure that issue #89 in FMPy is resolved.
+
+    When reading input data from a .csv-file in FMPy, the values are shifted in time by one output
+    interval. This was reported in https://github.com/CATIA-Systems/FMPy/issues/89 -- the minimal
+    working example described there is implemented in this test.
+    """
+
+    model_instance_id = 'fmpy_issue89'
+    # input_csv = os.path.join(
+    #     test_data_base_path, model_instance_id,
+    #     'MinimalWorkingExampleInputShifting_in.csv'
+    # )
+    # input_ndarray = np.genfromtxt(
+    #     input_csv=os.path.join(input_csv, delimiter=',', names=True, deletechars='')
+    # )
+
+    sim_result_df = pd.DataFrame(
+        data={'y1': [float(x) for x in list(range(0, 40, 5))]},
+        index=[x / 10 for x in list(range(0, 40, 5))]
+    )
+    sim_result_df.index.name = 'time'
+
+    context = dict(
+        data=dict(
+            mq_payload=dict(
+                request=dict(
+                    id=model_instance_id,
+                    body={
+                        'modelInstanceID': model_instance_id,
+                        'simulationParameters': {
+                            'startTime': 0,
+                            'stopTime': 3.5,
+                            'outputInterval': 0.5
+                        },
+                        'inputTimeseries': [
+                            {
+                                'label': 'u1',
+                                'unit': '1',
+                                'timeseries': [
+                                    {'timestamp': 0, 'value': 0},
+                                    {'timestamp': 1, 'value': 10},
+                                    {'timestamp': 2, 'value': 20},
+                                    {'timestamp': 3, 'value': 30},
+                                    {'timestamp': 4, 'value': 40},
+                                    {'timestamp': 5, 'value': 50},
+                                    {'timestamp': 6, 'value': 60},
+                                ]
+                            }
+                        ]
+                    }
+                )
+            )
+        ),
+        expectations=dict(
+            simulate_fmu2_cs=sim_result_df
+        )
+    )
+
+    return context
+
+
 def pv_20181117_15kWp_saarbruecken():
     """Provide data set for 15kWp PV plant on 20181117 at Saarland Uni."""
     model_instance_id = 'c02f1f12-966d-4eab-9f21-dcf265ceac71'
@@ -175,6 +237,7 @@ def ctx():
 
     return {
         'mwe': mwe(),
+        'fmpy_issue89': fmpy_issue89(),
         '20181117': pv_20181117_15kWp_saarbruecken()
     }[choice]
 
