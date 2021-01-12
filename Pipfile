@@ -9,6 +9,7 @@ numpy = "*"
 pathlib = "*"
 pandas = "*"
 fmpy = {editable = true,path = "./FMPy"}
+pendulum = "*"
 
 [requires]
 python_version = "3"

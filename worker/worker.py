@@ -4,6 +4,7 @@
 import fmpy
 import numpy as np
 import pandas as pd
+import pendulum
 
 from . import logger
 
@@ -106,4 +107,5 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     df.set_index(pd.DatetimeIndex(df['time']*10**6).tz_localize('utc'), inplace=True)
     del df['time']
 
+    df = df[pendulum.from_timestamp(start_time/1000).to_datetime_string():pendulum.from_timestamp(stop_time/1000).to_datetime_string()]
     return df

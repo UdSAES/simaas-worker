@@ -11,7 +11,7 @@ for an explanation.
 import os
 import sys
 import json
-
+import pendulum
 import pytest
 import numpy as np
 import pandas as pd
@@ -210,6 +210,10 @@ def pv_20181117_15kWp_saarbruecken():
         inplace=True
     )
     del sim_result_df['time']
+
+    start_time = req_body['simulationParameters']['startTime']
+    stop_time = req_body['simulationParameters']['stopTime']
+    sim_result_df = sim_result_df[pendulum.from_timestamp(start_time/1000).to_datetime_string():pendulum.from_timestamp(stop_time/1000).to_datetime_string()]
 
     # Populate context-object
     context = dict(
