@@ -102,6 +102,27 @@ class TestSimulateFMU2forCS(object):
 
             actual = simulate_fmu2_cs(fmu_filepath, options, req_id)
 
+            # Compare dataframes manually
+            df = pd.DataFrame.join(
+                desired, actual,
+                how='outer', lsuffix='_dymola', rsuffix='_fmpy'
+            )
+            if all(item in desired.columns for item in ['powerDC', 'totalEnergyDC']):
+                df['powerDC_diff'] = df['powerDC_dymola'] - df['powerDC_fmpy']
+                df['totalEnergyDC_diff'] = df['totalEnergyDC_dymola'] - df['totalEnergyDC_fmpy']
+
+                with pd.option_context('display.max.columns', None, 'display.max.rows', None):
+                    print(df.loc[:, [
+                        'powerDC_dymola',
+                        'powerDC_fmpy',
+                        'powerDC_diff',
+                        # 'totalEnergyDC_dymola',
+                        # 'totalEnergyDC_fmpy',
+                        # 'totalEnergyDC_diff',
+                    ]].between_time('5:00', '18:00'))
+            else:
+                print(df)
+
             self.assert_frame_equal(actual, desired)
         else:
             pytest.skip('skipped because no expectation was specified')
