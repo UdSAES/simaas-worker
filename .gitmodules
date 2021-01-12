@@ -1,0 +1,3 @@
+[submodule "FMPy"]
+	path = FMPy
+	url = git@github.com:CATIA-Systems/FMPy.git
