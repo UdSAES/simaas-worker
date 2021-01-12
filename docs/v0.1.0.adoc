@@ -26,5 +26,5 @@ Initial release
 ** [ ] The Dockerfile SHOULD be structured according to https://docs.docker.com/develop/develop-images/dockerfile_best-practices/[best practices]
 ** [ ] `SIGTERM`, `SIGINT` signals MUST be propagated properly
 * [ ] The software MUST shut down gracefully upon `SIGTERM`, `SIGINT`
-* [x] The source code MUST adhere to https://www.python.org/dev/peps/pep-0008/[PEP8] with 99 characters per line and 72 characters for comments/docstrings
+* [x] The source code MUST adhere to https://www.python.org/dev/peps/pep-0008/[PEP8] with 88 characters per line and 72 characters for comments/docstrings
 * [x] The source code SHOULD adhere to https://www.python.org/dev/peps/pep-0257/[PEP257] (no spaces after/before `"""`)

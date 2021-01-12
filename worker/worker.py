@@ -23,11 +23,11 @@ def timeseries_dict_to_pd_series(ts_dict):
     timestamps = []
     values = []
 
-    for obj in ts_dict['timeseries']:
-        timestamps.append(obj['timestamp'])
-        values.append(obj['value'])
+    for obj in ts_dict["timeseries"]:
+        timestamps.append(obj["timestamp"])
+        values.append(obj["value"])
 
-    s = pd.Series(values, index=timestamps, name=ts_dict['label'])
+    s = pd.Series(values, index=timestamps, name=ts_dict["label"])
     s.sort_index(inplace=True)
 
     return s
@@ -37,19 +37,21 @@ def prepare_bc_for_fmpy(ts, units=None):
     """Turn array of pd.Series into correctly shaped np.ndarray."""
 
     df = pd.DataFrame(ts[0])
-    df = df.join(ts[1:], how='outer')  # use how='outer' to not drop rows with missing values
+    df = df.join(
+        ts[1:], how="outer"
+    )  # use how='outer' to not drop rows with missing values
 
     # Deal with missing values explicitly
     # TODO decide which method to use!
     # df.fillna(value=FILLNA, inplace=True)
-    df.interpolate(method='linear', inplace=True)  # XXX interpolation!
+    df.interpolate(method="linear", inplace=True)  # XXX interpolation!
 
     # Ensure that seconds relative to offset are used as index
     offset = df.index.min()
-    df['time_rel'] = df.index
-    df['time_rel'] = df['time_rel'].apply(lambda x: float((x - offset)/1000))
-    df.set_index('time_rel', inplace=True)
-    df.index.rename('time', inplace=True)
+    df["time_rel"] = df.index
+    df["time_rel"] = df["time_rel"].apply(lambda x: float((x - offset) / 1000))
+    df.set_index("time_rel", inplace=True)
+    df.index.rename("time", inplace=True)
 
     # Transform into np.ndarray with correct dtypes
     ndarray = np.array(df.to_records())
@@ -68,13 +70,13 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     # Prepare input data
     input_timeseries = []
     input_units = []
-    for ts_obj in options['inputTimeseries']:
+    for ts_obj in options["inputTimeseries"]:
         input_timeseries.append(timeseries_dict_to_pd_series(ts_obj))
-        input_units.append(ts_obj['unit'])
-    start_time = options['simulationParameters']['startTime']
-    stop_time = options['simulationParameters']['stopTime']
+        input_units.append(ts_obj["unit"])
+    start_time = options["simulationParameters"]["startTime"]
+    stop_time = options["simulationParameters"]["stopTime"]
     relative_tolerance = 10e-5
-    output_interval = options['simulationParameters']['outputInterval']
+    output_interval = options["simulationParameters"]["outputInterval"]
     input_ts = prepare_bc_for_fmpy(input_timeseries, input_units)
     # start_values = dict(epochOffset=start_time/1000)  # XXX assumes existence of variable!! BAD!
 
@@ -85,7 +87,7 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
         validate=True,
         start_time=0,
         # stop_time=stop_time,
-        stop_time=int((stop_time - start_time)/1000),
+        stop_time=int((stop_time - start_time) / 1000),
         relative_tolerance=relative_tolerance,
         output_interval=output_interval,
         # start_values=start_values,
@@ -100,11 +102,17 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     # Return simulation result as pd.DataFrame
     df = pd.DataFrame(sim_result)
     # df.set_index(df['time'], inplace=True)
-    df['time'] = df['time']*1000 + start_time
-    df.set_index(pd.DatetimeIndex(df['time']*10**6).tz_localize('utc'), inplace=True)
-    del df['time']
+    df["time"] = df["time"] * 1000 + start_time
+    df.set_index(
+        pd.DatetimeIndex(df["time"] * 10 ** 6).tz_localize("utc"), inplace=True
+    )
+    del df["time"]
 
-    df = df[pendulum.from_timestamp(start_time/1000).to_datetime_string():pendulum.from_timestamp(stop_time/1000).to_datetime_string()]
+    df = df[
+        pendulum.from_timestamp(start_time / 1000)
+        .to_datetime_string() : pendulum.from_timestamp(stop_time / 1000)
+        .to_datetime_string()
+    ]
 
     logger.trace(f"df\n{df}")
 
