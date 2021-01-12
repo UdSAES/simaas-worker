@@ -4,7 +4,8 @@
 import fmpy
 import numpy as np
 import pandas as pd
-from loguru import logger
+
+from . import logger
 
 
 FILLNA = 0
@@ -39,7 +40,9 @@ def prepare_bc_for_fmpy(ts, units=None):
     df = df.join(ts[1:], how='outer')  # use how='outer' to not drop rows with missing values
 
     # Deal with missing values explicitly
-    df.fillna(value=FILLNA, inplace=True)
+    # TODO decide which method to use!
+    # df.fillna(value=FILLNA, inplace=True)
+    df.interpolate(method='linear', inplace=True)  # XXX interpolation!
 
     # Ensure that seconds relative to offset are used as index
     offset = df.index.min()
@@ -47,6 +50,8 @@ def prepare_bc_for_fmpy(ts, units=None):
     df['time_rel'] = df['time_rel'].apply(lambda x: float((x - offset)/1000))
     df.set_index('time_rel', inplace=True)
     df.index.rename('time', inplace=True)
+
+    logger.debug(f"df\n{df}")
 
     # Transform into np.ndarray with correct dtypes
     ndarray = np.array(df.to_records())
@@ -81,21 +86,24 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
         fmu_filepath,
         validate=True,
         start_time=0,
-        stop_time=stop_time,
-        # stop_time=int((stop_time - start_time)/1000),
+        # stop_time=stop_time,
+        stop_time=int((stop_time - start_time)/1000),
         relative_tolerance=relative_tolerance,
         output_interval=output_interval,
         # start_values=start_values,
         apply_default_start_values=True,
         input=input_ts,
-        output=None
+        # output=[
+        #     'temperature', 'directHorizontalIrradiance', 'diffuseHorizontalIrradiance',
+        #     'powerDC', 'totalEnergyDC'
+        # ]  # TODO use list of all variables from modelDescription.xml?
     )
 
     # Return simulation result as pd.DataFrame
     df = pd.DataFrame(sim_result)
-    df.set_index(df['time'], inplace=True)
-    # df['time'] = df['time']*1000 + start_time
-    # df.set_index(pd.DatetimeIndex(df['time']*10**6).tz_localize('utc'), inplace=True)
+    # df.set_index(df['time'], inplace=True)
+    df['time'] = df['time']*1000 + start_time
+    df.set_index(pd.DatetimeIndex(df['time']*10**6).tz_localize('utc'), inplace=True)
     del df['time']
 
     return df

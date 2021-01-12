@@ -6,7 +6,7 @@ import os
 import sys
 import json
 import socket
-
+import pandas as pd
 from loguru import logger
 
 from .worker import FILLNA  # noqa
@@ -76,10 +76,15 @@ else:
 
 
 
+# Load & verify additional config
+def init():
+    logger.bind(code=300000).info('Initializing worker')
+
 
 # Run module
 @logger.catch
 def main():
+    init()
 
     test_data_base_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), '..', 'tests', 'data'
@@ -100,6 +105,9 @@ def main():
     with open(req_body_json_file) as fp:
         req_body = json.load(fp)
 
+    req_body['simulationParameters']['outputInterval'] = 900
+
     result = simulate_fmu2_cs(fmu_filepath, req_body, req_id=None)
 
-    print(result)
+    with pd.option_context('display.max.rows', None):
+        logger.debug(f"result\n{result.between_time('5:00', '18:00')}")
