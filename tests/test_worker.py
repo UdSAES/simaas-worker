@@ -5,17 +5,12 @@
 
 import os
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
-from worker import timeseries_dict_to_pd_series
-from worker import prepare_bc_for_fmpy
-from worker import simulate_fmu2_cs
-
-from tests import mwe
-from tests import fmpy_issue89
-from tests import pv_20181117_15kWp_saarbruecken
+from tests import fmpy_issue89, mwe, pv_20181117_15kWp_saarbruecken
+from worker import prepare_bc_for_fmpy, simulate_fmu2_cs, timeseries_dict_to_pd_series
 
 
 @pytest.mark.parametrize(

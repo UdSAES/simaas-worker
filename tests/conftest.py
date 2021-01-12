@@ -8,13 +8,14 @@ https://docs.python-guide.org/writing/structure/#test-suite
 for an explanation.
 """
 
+import json
 import os
 import sys
-import json
-import pendulum
-import pytest
+
 import numpy as np
 import pandas as pd
+import pendulum
+import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import worker  # noqa -- import has to happen _after_ modifying PATH

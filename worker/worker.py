@@ -8,7 +8,6 @@ import pendulum
 
 from . import logger
 
-
 FILLNA = 0
 
 

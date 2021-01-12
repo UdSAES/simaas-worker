@@ -2,17 +2,18 @@
 # -*- coding: utf8 -*-
 
 
-import os
-import sys
 import json
+import os
 import socket
+import sys
+
 import pandas as pd
 from loguru import logger
 
 from .worker import FILLNA  # noqa
-from .worker import timeseries_dict_to_pd_series  # noqa
 from .worker import prepare_bc_for_fmpy  # noqa
 from .worker import simulate_fmu2_cs  # noqa
+from .worker import timeseries_dict_to_pd_series  # noqa
 
 
 # Configure logging
