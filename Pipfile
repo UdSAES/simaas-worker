@@ -7,8 +7,8 @@ name = "pypi"
 loguru = "*"
 numpy = "*"
 pathlib = "*"
-fmpy = "*"
 pandas = "*"
+fmpy = {editable = true,path = "./FMPy"}
 
 [requires]
 python_version = "3"
