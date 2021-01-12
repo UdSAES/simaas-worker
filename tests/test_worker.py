@@ -33,7 +33,7 @@ class TestPreProcessing(object):
             desired = ctx['expectations']['timeseries_dict_to_pd_series']['t2m']
             actual = timeseries_dict_to_pd_series(input)
 
-            assert actual.equals(desired)
+            pd.testing.assert_series_equal(desired, actual)
         else:
             pytest.skip('skipped because no expectation was specified')
 
@@ -67,22 +67,22 @@ class TestPreProcessing(object):
 )
 class TestSimulateFMU2forCS(object):
 
-    def _pd_df_equal(self, a, b):
-        try:
-            pd.testing.assert_frame_equal(
-                a,
-                b,
-                check_dtype=True,
-                check_index_type='equiv',
-                check_column_type='equiv',
-                check_frame_type=True,
-                check_less_precise=False,
-                check_names=True,
-                check_exact=False
-            )
-        except AssertionError:
-            return False
-        return True
+    def assert_frame_equal(self, a, b):
+        with pd.option_context('display.max.columns', None):
+            print(a)
+            print(b)
+
+        pd.testing.assert_frame_equal(
+            a,
+            b,
+            check_dtype=True,
+            check_index_type='equiv',
+            check_column_type='equiv',
+            check_frame_type=True,
+            check_less_precise=False,
+            check_names=True,
+            check_exact=False
+        )
 
     # Verify that FMU used for testing is available
     def test_fmu_exists(self, ctx, fmu_filepath):
@@ -102,7 +102,7 @@ class TestSimulateFMU2forCS(object):
 
             actual = simulate_fmu2_cs(fmu_filepath, options, req_id)
 
-            assert self._pd_df_equal(actual, desired) is True
+            self.assert_frame_equal(actual, desired)
         else:
             pytest.skip('skipped because no expectation was specified')
 
