@@ -229,19 +229,6 @@ def pv_20181117_15kWp_saarbruecken():
     return context
 
 
-@pytest.fixture(scope='session')
-def ctx():
-    """Provide context for tests depending on ENVVAR `TEST_DATA`."""
-
-    choice = os.environ['TEST_DATA'] if 'TEST_DATA' in os.environ else 'mwe'
-
-    return {
-        'mwe': mwe(),
-        'fmpy_issue89': fmpy_issue89(),
-        '20181117': pv_20181117_15kWp_saarbruecken()
-    }[choice]
-
-
 @pytest.fixture
 def fmu_filepath(ctx):
     fmu_filepath = os.path.join(

@@ -13,7 +13,18 @@ from worker import timeseries_dict_to_pd_series
 from worker import prepare_bc_for_fmpy
 from worker import simulate_fmu2_cs
 
+from tests import mwe
+from tests import fmpy_issue89
+from tests import pv_20181117_15kWp_saarbruecken
 
+
+@pytest.mark.parametrize(
+    "ctx", [
+        mwe(),
+        fmpy_issue89(),
+        pv_20181117_15kWp_saarbruecken(),
+    ]
+)
 class TestPreProcessing(object):
     def test_dict_2_pd_series(self, ctx):
         if 'timeseries_dict_to_pd_series' in ctx['expectations']:
@@ -47,7 +58,13 @@ class TestPreProcessing(object):
         else:
             pytest.skip('skipped because no expectation was specified')
 
-
+@pytest.mark.parametrize(
+    "ctx", [
+        mwe(),
+        fmpy_issue89(),
+        pv_20181117_15kWp_saarbruecken(),
+    ]
+)
 class TestSimulateFMU2forCS(object):
 
     def _pd_df_equal(self, a, b):
@@ -68,12 +85,12 @@ class TestSimulateFMU2forCS(object):
         return True
 
     # Verify that FMU used for testing is available
-    def test_fmu_exists(self, fmu_filepath):
+    def test_fmu_exists(self, ctx, fmu_filepath):
         assert os.path.isfile(fmu_filepath)
 
     # Function MUST raise an error if the FMU does not exist
     @pytest.mark.skip
-    def test_fmu_does_not_exist(self, fmu_filepath):
+    def test_fmu_does_not_exist(self, ctx, fmu_filepath):
         pass
 
     # Actual simulation result MUST match expected result
@@ -91,7 +108,7 @@ class TestSimulateFMU2forCS(object):
 
     # Logs MUST match the agreed upon schema
     @pytest.mark.skip
-    def test_log_format(self):
+    def test_log_format(self, ctx):
         pass
     #     simulate_fmu2_cs(fmu_filepath, {})
     #     # https://docs.pytest.org/en/latest/
