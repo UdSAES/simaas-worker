@@ -68,10 +68,6 @@ class TestPreProcessing(object):
 class TestSimulateFMU2forCS(object):
 
     def assert_frame_equal(self, a, b):
-        with pd.option_context('display.max.columns', None):
-            print(a)
-            print(b)
-
         pd.testing.assert_frame_equal(
             a,
             b,
