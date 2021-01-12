@@ -11,3 +11,9 @@ local/
 # Ignore fmpy-status indicators
 status.
 success.
+
+# Ignore temporary files
+.~*.*#  # LibreOffice Calc
+
+# Ignore file for storing the developer's environment
+.env
