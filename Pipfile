@@ -18,3 +18,8 @@ python_version = "3"
 pytest = "*"
 flake8 = "*"
 pycodestyle = "*"
+isort = "*"
+black = "*"
+
+[pipenv]
+allow_prereleases = true
