@@ -132,19 +132,13 @@ def mwe():
 def fmpy_issue89():
     """Ensure that issue #89 in FMPy is resolved.
 
-    When reading input data from a .csv-file in FMPy, the values are shifted in time by one output
-    interval. This was reported in https://github.com/CATIA-Systems/FMPy/issues/89 -- the minimal
-    working example described there is implemented in this test.
+    When reading input data from a .csv-file in FMPy, the values are
+    shifted in time by one output interval. This was reported in
+    https://github.com/CATIA-Systems/FMPy/issues/89 -- the minimal working
+    example described there is implemented in this test.
     """
 
     model_instance_id = "fmpy_issue89"
-    # input_csv = os.path.join(
-    #     test_data_base_path, model_instance_id,
-    #     'MinimalWorkingExampleInputShifting_in.csv'
-    # )
-    # input_ndarray = np.genfromtxt(
-    #     input_csv=os.path.join(input_csv, delimiter=',', names=True, deletechars='')
-    # )
 
     sim_result_df = pd.DataFrame(
         data={"y1": [float(x) for x in list(range(0, 40, 5))]},
