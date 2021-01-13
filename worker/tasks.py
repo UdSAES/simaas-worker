@@ -3,7 +3,7 @@
 
 import os
 
-from worker import logger, simulate_fmu2_cs
+from worker import df_to_repr_json, logger, simulate_fmu2_cs
 
 from .celery import app
 
@@ -21,6 +21,6 @@ def simulate(req_body):
     pass
 
     # Format result and return (MUST be serializable as JSON)
-    data_as_json = {}
+    data_as_json = df_to_repr_json(df, fmu)
 
     return data_as_json

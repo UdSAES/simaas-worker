@@ -2,11 +2,13 @@
 # -*- coding: utf8 -*-
 
 import distutils
+import json
 
 import fmpy
 import numpy as np
 import pandas as pd
 import pendulum
+import pydash
 
 from . import logger
 
@@ -153,3 +155,47 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     log.trace(f"df\n{df}")
 
     return df
+
+
+def df_to_repr_json(df, fmu):
+    """Render JSON-representation of DataFrame."""
+
+    logger.trace("df:\n{}".format(df))
+
+    # Read model description
+    desc = fmpy.read_model_description(fmu)
+
+    # Transform columns of dataframe to JSON-object
+    data = []
+    for cname in df.columns:
+        # Find unit of quantity
+        model_variable = pydash.collections.find(
+            desc.modelVariables, lambda x: x.name == cname
+        )
+        if model_variable.unit is not None:
+            unit = model_variable.unit
+        else:
+            unit = "1"
+
+        # Transform dataframe to timeseries-object
+        ts_value_objects = json.loads(
+            df[cname]
+            .to_json(orient="table")
+            .replace("time", "timestamp")
+            .replace(cname, "value")
+        )["data"]
+        for x in ts_value_objects:
+            x["datetime"] = pendulum.parse(x["timestamp"]).isoformat()
+            x["timestamp"] = int(pendulum.parse(x["timestamp"]).format("x"))
+
+        # Join label, unit and data
+        data.append(
+            {
+                "label": cname,
+                "unit": unit,
+                "timeseries": ts_value_objects,
+            }
+        )
+
+    # Return JSON-representation of entire dataframe _without_ additional content
+    return data

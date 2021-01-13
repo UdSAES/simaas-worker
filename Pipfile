@@ -11,6 +11,7 @@ pandas = "*"
 fmpy = {editable = true,path = "./FMPy"}
 pendulum = "*"
 celery = "*"
+pydash = "*"
 
 [requires]
 python_version = "3"
