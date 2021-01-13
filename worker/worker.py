@@ -107,7 +107,7 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     output_interval = options["simulationParameters"]["outputInterval"]
 
     # Ensure that start values are set as required
-    # start_values = dict(epochOffset=start_time/1000)  # XXX assumes existence of variable!! BAD!
+    start_values = options["startValues"] if "startValues" in options.keys() else {}
 
     # Execute simulation
     # -- inside the FMU, time is represented in seconds starting at zero!
@@ -118,7 +118,7 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
         stop_time=stop_time,
         relative_tolerance=relative_tolerance,
         output_interval=output_interval,
-        # start_values=start_values,
+        start_values=start_values,
         apply_default_start_values=True,
         input=input_ts,
         # output=[
