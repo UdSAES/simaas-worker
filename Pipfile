@@ -10,6 +10,7 @@ pathlib = "*"
 pandas = "*"
 fmpy = {editable = true,path = "./FMPy"}
 pendulum = "*"
+celery = "*"
 
 [requires]
 python_version = "3"
