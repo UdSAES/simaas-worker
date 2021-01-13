@@ -48,6 +48,7 @@ def mwe():
                             "startTime": 1542412800000,
                             "stopTime": 1542420000000,
                             "outputInterval": 3600,
+                            "inputTimeIsRelative": "false",
                         },
                         "inputTimeseries": [
                             {
@@ -147,7 +148,7 @@ def fmpy_issue89():
 
     sim_result_df = pd.DataFrame(
         data={"y1": [float(x) for x in list(range(0, 40, 5))]},
-        index=[x / 10 for x in list(range(0, 40, 5))],
+        index=pd.Index([x / 10 for x in list(range(0, 40, 5))], dtype="float"),
     )
     sim_result_df.index.name = "time"
 
@@ -162,6 +163,7 @@ def fmpy_issue89():
                             "startTime": 0,
                             "stopTime": 3.5,
                             "outputInterval": 0.5,
+                            "inputTimeIsRelative": "true",
                         },
                         "inputTimeseries": [
                             {

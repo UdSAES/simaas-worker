@@ -3,7 +3,8 @@
   "simulationParameters": {
     "startTime": 1542412800000,
     "stopTime": 1542499199999,
-    "outputInterval": 900
+    "outputInterval": 900,
+    "inputTimeIsRelative": "false"
   },
   "inputTimeseries": [
     {
