@@ -169,7 +169,7 @@ def df_to_repr_json(df, fmu):
     data = []
     for cname in df.columns:
         # Find unit of quantity
-        model_variable = pydash.collections.find(
+        model_variable = pydash.find(
             desc.modelVariables, lambda x: x.name == cname
         )
         if model_variable.unit is not None:
