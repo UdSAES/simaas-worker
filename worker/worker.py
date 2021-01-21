@@ -64,10 +64,11 @@ def prepare_bc_for_fmpy(ts, is_relative, offset=None):
     return ndarray
 
 
-def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
+def simulate_fmu2_cs(fmu_filepath, parameter_set_filepath, options):
     """Simulate FMU 2.0 for CS, return result as pd.DataFrame."""
 
     # Ensure that logs can be correlated to requests
+    req_id = options["requestId"]
     if req_id is not None:
         log = logger.bind(req_id=req_id)
     else:
@@ -111,7 +112,13 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     output_interval = options["simulationParameters"]["outputInterval"]
 
     # Ensure that start values are set as required
-    start_values = options["startValues"] if "startValues" in options.keys() else {}
+    # start_values = options["startValues"] if "startValues" in options.keys() else {}
+    start_values = {
+        "fileName": parameter_set_filepath,
+    }
+
+    if input_time_is_relative is False:
+        start_values["epochOffset"] = offset / 1000
 
     # Execute simulation
     # -- inside the FMU, time is represented in seconds starting at zero!

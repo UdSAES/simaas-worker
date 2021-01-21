@@ -12,6 +12,7 @@ fmpy = {editable = true,path = "./FMPy"}
 pendulum = "*"
 celery = "*"
 pydash = "*"
+scipy = "*"
 
 [requires]
 python_version = "3"
