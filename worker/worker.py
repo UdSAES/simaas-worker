@@ -66,15 +66,17 @@ def prepare_bc_for_fmpy(ts, is_relative, offset=None):
 
 def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
     """Simulate FMU 2.0 for CS, return result as pd.DataFrame."""
-    input_time_is_relative = bool(
-        distutils.util.strtobool(options["simulationParameters"]["inputTimeIsRelative"])
-    )
 
     # Ensure that logs can be correlated to requests
     if req_id is not None:
         log = logger.bind(req_id=req_id)
     else:
         log = logger
+
+    # Decide whether or not to apply an offset to the input time series
+    input_time_is_relative = bool(
+        distutils.util.strtobool(options["simulationParameters"]["inputTimeIsRelative"])
+    )
 
     # Prepare input data
     input_timeseries = []
@@ -123,10 +125,7 @@ def simulate_fmu2_cs(fmu_filepath, options, req_id=None):
         start_values=start_values,
         apply_default_start_values=True,
         input=input_ts,
-        # output=[
-        #     'temperature', 'directHorizontalIrradiance', 'diffuseHorizontalIrradiance',
-        #     'powerDC', 'totalEnergyDC'
-        # ]  # TODO use list of all variables from modelDescription.xml?
+        fmi_call_logger=log.trace,
     )
 
     # Return simulation result as pd.DataFrame
@@ -169,9 +168,7 @@ def df_to_repr_json(df, fmu):
     data = []
     for cname in df.columns:
         # Find unit of quantity
-        model_variable = pydash.find(
-            desc.modelVariables, lambda x: x.name == cname
-        )
+        model_variable = pydash.find(desc.modelVariables, lambda x: x.name == cname)
         if model_variable.unit is not None:
             unit = model_variable.unit
         else:
