@@ -1,3 +1,0 @@
-[flake8]
-; http://flake8.pycqa.org/en/latest/user/options.html#options-list
-max-line-length = 88
