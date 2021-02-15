@@ -4,6 +4,7 @@
 import os
 
 import pydash
+import requests
 import scipy.io as sio
 
 from worker import df_to_repr_json, logger, simulate_fmu2_cs
@@ -11,6 +12,7 @@ from worker import df_to_repr_json, logger, simulate_fmu2_cs
 from .celery import app
 
 # Specify directories in which to store temporary files
+tmp_dir = os.environ["SIMWORKER_TMPFS_PATH"]
 
 # Use global objects as local lookup table
 model_instances = {}
@@ -20,15 +22,25 @@ model_instances = {}
 def get_fmu_filepath(model_href):
     """Get filepath of model as FMU."""
 
-    # Iff .fmu-file doesn't exist locally, download it
-
-    # Return local path to previously downloaded file
     filepath = os.path.join(
-        fmu_tmp_dir,
+        tmp_dir,
         model_href.split("/")[-2],
         model_href.split("/")[-1],
     )
 
+    # Iff .fmu-file doesn't exist locally, download it
+    if not os.path.isfile(filepath):
+        # Prepare directory
+        dirname = os.path.dirname(filepath)
+        if not os.path.isdir(dirname):
+            os.mkdir(dirname)
+
+        # Download and save file
+        r = requests.get(model_href)
+        with open(filepath, "w+b") as fp:
+            fp.write(r.content)
+
+    # Return local path to previously downloaded file
     return filepath
 
 
@@ -39,7 +51,7 @@ def get_parameter_set_filepath(task_rep):
 
     # Iff the parameter set is new, save it as .mat-file
     if not pydash.has(model_instances, instance_id):
-        filepath = os.path.join(mat_tmp_dir, instance_id + ".mat")
+        filepath = os.path.join(tmp_dir, instance_id + ".mat")
         sio.savemat(filepath, task_rep["parameterSet"], format="4")
         model_instances[instance_id] = filepath
 

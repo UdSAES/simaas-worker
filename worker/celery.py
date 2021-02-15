@@ -12,7 +12,11 @@ EXIT_ENVVAR_MISSING = 1
 
 
 # Ensure that all required ENVVARs are set
-for var in ["BACKEND_HREF", "BROKER_HREF"]:
+for var in [
+    "BROKER_HREF",
+    "BACKEND_HREF",
+    "TMPFS_PATH",
+]:
     try:
         os.environ[f"SIMWORKER_{var}"]
     except KeyError as e:
