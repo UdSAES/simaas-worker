@@ -163,7 +163,7 @@ def simulate_fmu2_cs(fmu_filepath, parameter_set_filepath, options):
     return df
 
 
-def df_to_repr_json(df, fmu):
+def df_to_repr_json(df, fmu, time_is_relative):
     """Render JSON-representation of DataFrame."""
 
     logger.trace("df:\n{}".format(df))
@@ -188,9 +188,10 @@ def df_to_repr_json(df, fmu):
             .replace("time", "timestamp")
             .replace(cname, "value")
         )["data"]
-        for x in ts_value_objects:
-            x["datetime"] = pendulum.parse(x["timestamp"]).isoformat()
-            x["timestamp"] = int(pendulum.parse(x["timestamp"]).format("x"))
+        if time_is_relative is False:
+            for x in ts_value_objects:
+                x["datetime"] = pendulum.parse(x["timestamp"]).isoformat()
+                x["timestamp"] = int(pendulum.parse(x["timestamp"]).format("x"))
 
         # Join label, unit and data
         data.append(

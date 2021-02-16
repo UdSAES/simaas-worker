@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 # -*- coding: utf8 -*-
 
+import distutils
 import os
 
 import pydash
@@ -76,6 +77,11 @@ def simulate(task_rep):
     pass
 
     # Format result and return (MUST be serializable as JSON)
-    data_as_json = df_to_repr_json(df, fmu_path)
+    input_time_is_relative = bool(
+        distutils.util.strtobool(
+            task_rep["simulationParameters"]["inputTimeIsRelative"]
+        )
+    )
+    data_as_json = df_to_repr_json(df, fmu_path, input_time_is_relative)
 
     return data_as_json
