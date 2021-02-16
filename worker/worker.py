@@ -1,7 +1,6 @@
 #! /usr/bin/python3
 # -*- coding: utf8 -*-
 
-import distutils
 import json
 
 import fmpy
@@ -13,6 +12,13 @@ import pydash
 from . import logger
 
 FILLNA = 0
+
+
+def strtobool(txt):
+    if txt.lower() == "true":
+        return True
+    else:
+        return False
 
 
 def timeseries_dict_to_pd_series(ts_dict):
@@ -75,8 +81,8 @@ def simulate_fmu2_cs(fmu_filepath, parameter_set_filepath, options):
         log = logger
 
     # Decide whether or not to apply an offset to the input time series
-    input_time_is_relative = bool(
-        distutils.util.strtobool(options["simulationParameters"]["inputTimeIsRelative"])
+    input_time_is_relative = strtobool(
+        options["simulationParameters"]["inputTimeIsRelative"]
     )
 
     # Prepare input data

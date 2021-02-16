@@ -1,14 +1,13 @@
 #! /usr/bin/python3
 # -*- coding: utf8 -*-
 
-import distutils
 import os
 
 import pydash
 import requests
 import scipy.io as sio
 
-from worker import df_to_repr_json, logger, simulate_fmu2_cs
+from worker import df_to_repr_json, logger, simulate_fmu2_cs, strtobool
 
 from .celery import app
 
@@ -77,10 +76,8 @@ def simulate(task_rep):
     pass
 
     # Format result and return (MUST be serializable as JSON)
-    input_time_is_relative = bool(
-        distutils.util.strtobool(
-            task_rep["simulationParameters"]["inputTimeIsRelative"]
-        )
+    input_time_is_relative = strtobool(
+        task_rep["simulationParameters"]["inputTimeIsRelative"]
     )
     data_as_json = df_to_repr_json(df, fmu_path, input_time_is_relative)
 
