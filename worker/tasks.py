@@ -51,8 +51,14 @@ def get_parameter_set_filepath(task_rep):
 
     # Iff the parameter set is new, save it as .mat-file
     if not pydash.has(model_instances, instance_id):
+        # Throw away units/only keep values
+        parameters = {}
+        for key, value in task_rep["parameterSet"].items():
+            parameters[key] = value["value"]
+
+        # Write parameter values to .mat-file
         filepath = os.path.join(tmp_dir, instance_id + ".mat")
-        sio.savemat(filepath, task_rep["parameterSet"], format="4")
+        sio.savemat(filepath, parameters, format="4")
         model_instances[instance_id] = filepath
 
     # Return local path to parameter set as .mat-file
