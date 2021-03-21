@@ -14,7 +14,6 @@ from .worker import FILLNA  # noqa
 from .worker import df_to_repr_json  # noqa
 from .worker import prepare_bc_for_fmpy  # noqa
 from .worker import simulate_fmu2_cs  # noqa
-from .worker import strtobool  # noqa
 from .worker import timeseries_dict_to_pd_series  # noqa
 
 

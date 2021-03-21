@@ -14,13 +14,6 @@ from . import logger
 FILLNA = 0
 
 
-def strtobool(txt):
-    if txt.lower() == "true":
-        return True
-    else:
-        return False
-
-
 def timeseries_dict_to_pd_series(ts_dict):
     """
     Turn timeseries object v1.3.0 into sorted pd.Series.
@@ -81,9 +74,7 @@ def simulate_fmu2_cs(fmu_filepath, parameter_set_filepath, options):
         log = logger
 
     # Decide whether or not to apply an offset to the input time series
-    input_time_is_relative = strtobool(
-        options["simulationParameters"]["inputTimeIsRelative"]
-    )
+    input_time_is_relative = options["simulationParameters"]["inputTimeIsRelative"]
 
     # Prepare input data
     input_timeseries = []
