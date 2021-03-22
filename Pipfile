@@ -15,6 +15,7 @@ pydash = "*"
 scipy = "*"
 redis = "*"
 requests = "*"
+cachetools = "*"
 
 [requires]
 python_version = "3.8"

@@ -3,9 +3,9 @@
 
 import os
 
-import pydash
 import requests
 import scipy.io as sio
+from cachetools import LRUCache, TTLCache, cached
 
 from worker import df_to_repr_json, logger, simulate_fmu2_cs
 
@@ -13,12 +13,25 @@ from .celery import app
 
 # Specify directories in which to store temporary files
 tmp_dir = os.environ["SIMWORKER_TMPFS_PATH"]
+cache_maxsize = int(os.environ["SIMWORKER_TMPFS_MAXSIZE"])
 
-# Use global objects as local lookup table
-model_instances = {}
+# Helper classes
+class LRUCacheWithAssociatedFile(LRUCache):
+    def popitem(self):
+        instance_id, filepath = super().popitem()
+        if os.path.isfile(filepath):
+            os.remove(filepath)
+        return instance_id, filepath
 
+
+# Global cache object <- use tmpfs-mount with maximum size of cache
+lru_cache_bounded_by_total_filesize = LRUCacheWithAssociatedFile(
+    getsizeof=lambda x: os.stat(x).st_size,
+    maxsize=cache_maxsize,
+)
 
 # Helper functions
+@cached(cache=lru_cache_bounded_by_total_filesize)
 def get_fmu_filepath(model_href):
     """Get filepath of model as FMU."""
 
@@ -44,25 +57,26 @@ def get_fmu_filepath(model_href):
     return filepath
 
 
+@cached(
+    cache=lru_cache_bounded_by_total_filesize,
+    key=lambda x: x["modelInstanceId"],
+)
 def get_parameter_set_filepath(task_rep):
     """Get filepath of parameter set as .mat-file."""
 
     instance_id = task_rep["modelInstanceId"]
 
-    # Iff the parameter set is new, save it as .mat-file
-    if not pydash.has(model_instances, instance_id):
-        # Throw away units/only keep values
-        parameters = {}
-        for key, value in task_rep["parameterSet"].items():
-            parameters[key] = value["value"]
+    # Throw away units/only keep values
+    parameters = {}
+    for key, value in task_rep["parameterSet"].items():
+        parameters[key] = value["value"]
 
-        # Write parameter values to .mat-file
-        filepath = os.path.join(tmp_dir, instance_id + ".mat")
-        sio.savemat(filepath, parameters, format="4")
-        model_instances[instance_id] = filepath
+    # Write parameter values to .mat-file
+    filepath = os.path.join(tmp_dir, instance_id + ".mat")
+    sio.savemat(filepath, parameters, format="4")
 
     # Return local path to parameter set as .mat-file
-    return model_instances[instance_id]
+    return filepath
 
 
 # Actual tasks
