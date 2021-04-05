@@ -7,7 +7,7 @@ import fmpy
 import numpy as np
 import pandas as pd
 import pendulum
-import pydash
+from pydash import py_
 
 from . import logger
 
@@ -172,7 +172,7 @@ def df_to_repr_json(df, fmu, time_is_relative):
     data = []
     for cname in df.columns:
         # Find unit of quantity
-        model_variable = pydash.find(desc.modelVariables, lambda x: x.name == cname)
+        model_variable = py_.find(desc.modelVariables, lambda x: x.name == cname)
         if model_variable.unit is not None:
             unit = model_variable.unit
         else:
