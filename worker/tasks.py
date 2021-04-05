@@ -1,13 +1,16 @@
 #! /usr/bin/python3
 # -*- coding: utf8 -*-
 
+import json
 import os
+import uuid
+from base64 import b64decode as base64decode
 
 import requests
 import scipy.io as sio
 from cachetools import LRUCache, TTLCache, cached
 
-from worker import df_to_repr_json, logger, simulate_fmu2_cs
+from worker import df_to_repr_json, logger, parse_model_description, simulate_fmu2_cs
 
 from .celery import app
 
@@ -31,6 +34,20 @@ lru_cache_bounded_by_total_filesize = LRUCacheWithAssociatedFile(
 )
 
 # Helper functions
+@cached(cache=lru_cache_bounded_by_total_filesize)
+def get_tmp_filepath(file_content, extension):
+    """Store file content as file on tmpfs."""
+
+    id = uuid.uuid4()
+
+    filepath = os.path.join(tmp_dir, f"{id}.{extension}")
+
+    with open(filepath, "w+b") as fp:
+        fp.write(file_content)
+
+    return filepath
+
+
 @cached(cache=lru_cache_bounded_by_total_filesize)
 def get_fmu_filepath(model_href):
     """Get filepath of model as FMU."""
@@ -100,3 +117,23 @@ def simulate(task_rep):
     data_as_json = df_to_repr_json(df, fmu_path, input_time_is_relative)
 
     return data_as_json
+
+
+@app.task
+def get_modelinfo(task_rep):
+    model_description = base64decode(task_rep["modelDescription"])
+    md_filepath = get_tmp_filepath(model_description, "xml")
+
+    template_parameters = base64decode(task_rep["templates"]["parameter"])
+    t_p_filepath = get_tmp_filepath(template_parameters, "json.jinja")
+
+    template_io = base64decode(task_rep["templates"]["io"])
+    t_io_filepath = get_tmp_filepath(template_io, "json.jinja")
+
+    records = task_rep["records"]
+
+    modelinfo = parse_model_description(
+        md_filepath, t_p_filepath, t_io_filepath, records
+    )
+
+    return json.dumps(modelinfo)
