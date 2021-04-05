@@ -2,16 +2,164 @@
 # -*- coding: utf8 -*-
 
 import json
+import os
 
 import fmpy
 import numpy as np
 import pandas as pd
 import pendulum
+from jinja2 import Environment, FileSystemLoader
 from pydash import py_
 
 from . import logger
 
 FILLNA = 0
+ENV = Environment(
+    loader=FileSystemLoader(os.environ["SIMWORKER_TMPFS_PATH"]),
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
+
+
+def cast_to_type(var, type):
+    if var == None:
+        return var
+    else:
+        if type == "Real":
+            return float(var)
+        if type == "Integer":
+            return int(var)
+        if type == "Enumeration":
+            raise NotImplementedError("type 'Enumeration' is not yet supported")
+        if type == "Boolean":
+            return bool(var)
+        if type == "String":
+            return str(var)
+
+
+def scalar_variable_as_obj(x):
+    type_map = {
+        "Real": "number",
+        "Integer": "integer",
+        "Enumeration": "Enumeration",
+        "Boolean": "boolean",
+        "String": "string",
+    }
+
+    obj = {
+        "name": py_.split(x.name, ".")[-1],
+        # "valueReference": x.valueReference,
+        "description": x.description,
+        "type": type_map[x.type],
+        # "dimensions": x.dimensions,
+        # "dimensionValueReferences": x.dimensionValueReferences,
+        "quantitiy": x.quantitiy,
+        "unit": x.unit,
+        # "displayUnit": x.displayUnit,
+        # "relativeQuantity": x.relativeQuantity,
+        "min": cast_to_type(x.min, x.type),
+        "max": cast_to_type(x.max, x.type),
+        "nominal": cast_to_type(x.nominal, x.type),
+        # "unbounded": x.unbounded,
+        "start": cast_to_type(x.start, x.type),
+        # "derivative": x.derivative,
+        # "causality": x.causality,
+        # "variability": x.variability,
+        # "initial": x.initial,
+        # "reinit": x.reinit,
+        # "sourceline": x.sourceline,
+    }
+
+    if x.declaredType is not None:
+        for q in [a for a in dir(x.declaredType) if not a.startswith("__")]:
+            k = q.__str__()
+            v = getattr(x.declaredType, q)
+
+            if k in obj:
+                if (obj[k] == None) and (v != None):
+                    if k in ["min", "max", "nominal", "start"]:
+                        obj[k] = cast_to_type(v, x.declaredType.type)
+                    else:
+                        obj[k] = v
+
+    if obj["unit"] is None:
+        obj["unit"] = 1
+
+    return py_.pick_by(obj, lambda x: x is not None)
+
+
+def render_template(template_path, objects):
+    template = ENV.get_template(template_path)
+    required = []
+    for obj in objects:
+        if not py_.has(obj, "start"):
+            required.append(obj["name"])
+    return template.render(data=objects, required=required)
+
+
+def parse_model_description(md_path, template_parameters, template_io, records):
+    """
+    Parse `modelDescription.xml` and derive schemata.
+
+    Reads the model description and derives JSON-schemata
+    for parameterization/inputs/outputs to be embedded in
+    the OpenAPI-Specification of the API.
+    """
+
+    def find_model_parameters(x, record_component_names):
+        a = False
+        for name in record_component_names:
+            a |= py_.starts_with(x.name, name)
+
+        return a
+
+    # Read the model description using FMPy
+    md = fmpy.read_model_description(md_path)
+
+    # Fill in basic properties of FMU
+    parsed = {
+        "guid": md.guid[1:-1],  # strip curly braces by slicing the string
+        "fmiVersion": md.fmiVersion,
+        "modelName": md.modelName,
+        "description": md.description,
+        "generationTool": md.generationTool,
+        "generationDateAndTime": md.generationDateAndTime,
+        "schemata": {},
+    }
+
+    # Derive the desired JSON schema objects
+    jobs = [
+        {
+            "name": "parameter",
+            "selector": lambda x: find_model_parameters(x, records),
+            "template": os.path.basename(template_parameters),
+        },
+        {
+            "name": "input",
+            "selector": lambda x: x.causality == "input",
+            "template": os.path.basename(template_io),
+        },
+        {
+            "name": "output",
+            "selector": lambda x: x.causality == "output",
+            "template": os.path.basename(template_io),
+        },
+    ]
+
+    for job in jobs:
+        # Filter model variables
+        scalar_variables = py_.filter(md.modelVariables, job["selector"])
+
+        # Represent each `ScalarVariable`-instance as object
+        objects = []
+        for var in scalar_variables:
+            objects.append(scalar_variable_as_obj(var))
+
+        # Render schema from template
+        schema = render_template(job["template"], objects)
+        parsed["schemata"][job["name"]] = json.loads(schema)
+
+    return parsed
 
 
 def timeseries_dict_to_pd_series(ts_dict):
