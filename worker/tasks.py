@@ -4,7 +4,6 @@
 import json
 import os
 import uuid
-from base64 import b64decode as base64decode
 
 import requests
 import scipy.io as sio
@@ -42,7 +41,7 @@ def get_tmp_filepath(file_content, extension):
 
     filepath = os.path.join(tmp_dir, f"{id}.{extension}")
 
-    with open(filepath, "w+b") as fp:
+    with open(filepath, "w+t") as fp:
         fp.write(file_content)
 
     return filepath
@@ -121,13 +120,13 @@ def simulate(task_rep):
 
 @app.task
 def get_modelinfo(task_rep):
-    model_description = base64decode(task_rep["modelDescription"])
+    model_description = task_rep["modelDescription"]
     md_filepath = get_tmp_filepath(model_description, "xml")
 
-    template_parameters = base64decode(task_rep["templates"]["parameter"])
+    template_parameters = task_rep["templates"]["parameter"]
     t_p_filepath = get_tmp_filepath(template_parameters, "json.jinja")
 
-    template_io = base64decode(task_rep["templates"]["io"])
+    template_io = task_rep["templates"]["io"]
     t_io_filepath = get_tmp_filepath(template_io, "json.jinja")
 
     records = task_rep["records"]
