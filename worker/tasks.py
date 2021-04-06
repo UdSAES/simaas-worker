@@ -53,8 +53,8 @@ def get_fmu_filepath(model_href):
 
     filepath = os.path.join(
         tmp_dir,
-        model_href.split("/")[-2],
         model_href.split("/")[-1],
+        'model.fmu'
     )
 
     # Iff .fmu-file doesn't exist locally, download it
@@ -65,7 +65,8 @@ def get_fmu_filepath(model_href):
             os.mkdir(dirname)
 
         # Download and save file
-        r = requests.get(model_href)
+        headers = {'accept': 'application/octet-stream'}
+        r = requests.get(model_href, headers=headers)
         with open(filepath, "w+b") as fp:
             fp.write(r.content)
 
