@@ -18,6 +18,7 @@ tmp_dir = os.environ["SIMWORKER_TMPFS_PATH"]
 cache_maxsize = int(os.environ["SIMWORKER_TMPFS_MAXSIZE"])
 
 # Helper classes
+# https://cachetools.readthedocs.io/en/stable/#extending-cache-classes
 class LRUCacheWithAssociatedFile(LRUCache):
     def popitem(self):
         instance_id, filepath = super().popitem()
@@ -51,11 +52,7 @@ def get_tmp_filepath(file_content, extension):
 def get_fmu_filepath(model_href):
     """Get filepath of model as FMU."""
 
-    filepath = os.path.join(
-        tmp_dir,
-        model_href.split("/")[-1],
-        'model.fmu'
-    )
+    filepath = os.path.join(tmp_dir, model_href.split("/")[-1], "model.fmu")
 
     # Iff .fmu-file doesn't exist locally, download it
     if not os.path.isfile(filepath):
@@ -65,7 +62,7 @@ def get_fmu_filepath(model_href):
             os.mkdir(dirname)
 
         # Download and save file
-        headers = {'accept': 'application/octet-stream'}
+        headers = {"accept": "application/octet-stream"}
         r = requests.get(model_href, headers=headers)
         with open(filepath, "w+b") as fp:
             fp.write(r.content)
@@ -99,6 +96,8 @@ def get_parameter_set_filepath(task_rep):
 # Actual tasks
 @app.task
 def simulate(task_rep):
+    """Run simulation job and return result."""
+
     # Retrieve filepath of FMU
     fmu_path = get_fmu_filepath(task_rep["modelHref"])
 
@@ -121,6 +120,8 @@ def simulate(task_rep):
 
 @app.task
 def get_modelinfo(task_rep):
+    """Use FMPy to derive JSON-schema from FMU."""
+
     model_description = task_rep["modelDescription"]
     md_filepath = get_tmp_filepath(model_description, "xml")
 

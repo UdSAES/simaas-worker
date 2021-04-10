@@ -150,7 +150,7 @@ def parse_model_description(md_path, template_parameters, template_io, records):
         # Filter model variables
         scalar_variables = py_.filter(md.modelVariables, job["selector"])
 
-        # Represent each `ScalarVariable`-instance as object
+        # Represent each `ScalarVariable`-instance as dictionary
         objects = []
         for var in scalar_variables:
             objects.append(scalar_variable_as_obj(var))
