@@ -50,3 +50,30 @@ All environment variables without a default value MUST be set before starting th
 | The path to the Dymola license file necessary to simulate FMUs created using Dymola.
 | --
 |===
+
+## Usage
+Worker instances can be run as native Celery-processes or using Docker.
+
+### Using Docker
+...
+
+### Using `celery worker`
+The optimal number of worker processes/threads depends on the application -- read the https://docs.celeryproject.org/en/latest/userguide/workers.html#concurrency[note on concurrency in the Celery-manual].
+
+.Running several instances with a fixed thread count
+[source,sh]
+----
+source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker1@%h
+source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker2@%h
+source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker3@%h
+----
+
+.https://docs.celeryproject.org/en/latest/userguide/workers.html#autoscaling[Dynamically spawn new threads if necessary]
+[source, sh]
+----
+source .env; celery -A worker worker --loglevel=INFO --autoscale=10,3
+----
+
+## Development
+_The test suite is currently broken!!_
+
