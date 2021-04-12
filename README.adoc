@@ -1,5 +1,5 @@
 # SIMaaS-Worker
-:simaas_api: https://github.com/UdSAES/simaas_api
+:simaas_api: https://github.com/UdSAES/simaas-api
 :celery: http://docs.celeryproject.org/en/latest/index.html
 
 This repository contains the source code that actually implements the functionality offered _as a Service_ via the {simaas_api}[SIMaaS-API] developed at the https://www.uni-saarland.de/en/lehrstuhl/frey/start.html[chair of automation- and energy systems] at Saarland university (UdS AES).
