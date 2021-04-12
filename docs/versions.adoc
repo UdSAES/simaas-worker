@@ -1,0 +1,24 @@
+= Version History
+
+This software is versioned using https://semver.org/spec/v2.0.0.html[Semantic Versioning 2.0.0] (semver) and follows the semver specification.
+
+== Overview
+[cols="3*"]
+|===
+
+| Version
+| Release Date
+| Notes
+
+| 0.1.0
+| ...
+| Initial implementation of the worker using Celery/Python/FMPy
+
+3*| ...
+
+|===
+
+== Release Notes
+Details about each release and the features being worked on in reverse order (most recent first).
+
+include::v0.1.0.adoc[leveloffset=+1]

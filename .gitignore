@@ -1,9 +1,19 @@
-// Ignore Node.js modules
+# Ignore Python Bytecode Files
+*.py[cod]     # Will match .pyc, .pyo and .pyd files.
+__pycache__/  # Exclude the whole folder
+
+# Ignore Node.js-Modules
 node_modules
 
-// Ignore temporary files created by FMPy
+# Ignore directory ./local
+local/
+
+# Ignore fmpy-status indicators
 status.
 success.
 
-// Ignore specific files/directories
-local/
+# Ignore temporary files
+.~*.*#  # LibreOffice Calc
+
+# Ignore file for storing the developer's environment
+.env

@@ -1,0 +1,79 @@
+# SIMaaS-Worker
+:simaas_api: https://github.com/UdSAES/simaas-api
+:celery: http://docs.celeryproject.org/en/latest/index.html
+
+This repository contains the source code that actually implements the functionality offered _as a Service_ via the {simaas_api}[SIMaaS-API] developed at the https://www.uni-saarland.de/en/lehrstuhl/frey/start.html[chair of automation- and energy systems] at Saarland university (UdS AES).
+
+More specifically, its capability is to execute simulations based on https://fmi-standard.org/[Functional Mock-up Units (FMUs)] using https://github.com/CATIA-Systems/FMPy[FMPy], a Python library developed at Dassault Systèmes.
+
+Requests for performing simulations are distributed to the worker instances by means of a distributed task queue implemented using {celery}[Celery]. Consequently, the available computing power can easily be increased both by allowing one instance to use more cores and by starting more instances in a cluster.
+
+Initially, a custom-made task queue was used instead. See xref:./docs/versions.adoc[./docs/versions.adoc] for the full version history and more information.
+
+== Installation
+...
+
+=== Configuration
+All environment variables without a default value MUST be set before starting the program. Otherwise, a fatal error will be raised and the program will terminate with a non-zero exit code.
+
+[#tbl-envvars,options="header",cols="2,5,1"]
+|===
+| Environment Variable
+| Description
+| Default Value
+
+| SIMWORKER_BROKER_HREF
+| The https://en.wikipedia.org/wiki/URL#Syntax[`scheme` and `authority`-parts] of a URL pointing to the RabbitMQ-instance to be used as message broker.
+| --
+
+| SIMWORKER_BACKEND_HREF
+| The https://en.wikipedia.org/wiki/URL#Syntax[`scheme` and `authority`-parts] of a URL pointing to the Redis-instance to be used as result backend.
+| --
+
+| SIMWORKER_TMPFS_PATH
+| The path at which to store temporary files. Should be a `tmpfs`-mount for better speed but can be a normal directory, too.
+| --
+
+| SIMWORKER_TMPFS_MAXSIZE
+| The maximum amount of bytes that the temporary files are allowed to consume. Iff the total file size of all temporary files exceeds this limit, the least recently used files are deleted.
+| --
+
+| SIMWORKER_LOG_STRUCTURED
+| Whether to output logs as JSON-objects (`"true"`) or formatted strings (`"false"`).
+| `"false"`
+
+| SIMWORKER_LOG_LEVEL
+|  The minimal included https://loguru.readthedocs.io/en/stable/api/logger.html#levels[log level] that shall be printed to `stdout`.
+| `"INFO"`
+
+| DYMOLA_RUNTIME_LICENSE
+| The path to the Dymola license file necessary to simulate FMUs created using Dymola.
+| --
+|===
+
+## Usage
+Worker instances can be run as native Celery-processes or using Docker.
+
+### Using Docker
+...
+
+### Using `celery worker`
+The optimal number of worker processes/threads depends on the application -- read the https://docs.celeryproject.org/en/latest/userguide/workers.html#concurrency[note on concurrency in the Celery-manual].
+
+.Running several instances with a fixed thread count
+[source,sh]
+----
+source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker1@%h
+source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker2@%h
+source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker3@%h
+----
+
+.https://docs.celeryproject.org/en/latest/userguide/workers.html#autoscaling[Dynamically spawn new threads if necessary]
+[source, sh]
+----
+source .env; celery -A worker worker --loglevel=INFO --autoscale=10,3
+----
+
+## Development
+_The test suite is currently broken!!_
+

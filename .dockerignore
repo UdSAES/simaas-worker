@@ -1,0 +1,13 @@
+# Ignore everything
+# https://youknowfordevs.com/2018/12/07/getting-control-of-your-dockerignore-files.html
+*
+
+# Only include specific files/directories
+!FMPy/
+!worker/
+!tests/
+
+!pyproject.toml
+
+!Pipfile
+!Pipfile.lock

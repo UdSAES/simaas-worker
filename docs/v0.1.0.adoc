@@ -1,0 +1,30 @@
+== v0.1.0
+Initial release
+
+=== User Stories
+* [ ] As the API, I expect the workers to...
+** [ ] adhere to the format for exchanging data via message broker/result backend that has been agreed upon
+** [ ] consume valid input that has _not_ been preprocessed
+** [ ] execute a given FMU 2.0 for CS and return the simulation result
+** [ ] provide auxiliary information based on the metadata of the FMU
+
+=== Testing Strategy
+* [ ] Unit tests for...
+** [ ] actual functionality, i.e. simulating a FMU 2.0 CS with input etc.
+*** [x] minimal working example
+*** [ ] *typical example with real data*
+*** [ ] ensuring that parameters like `epochOffset` are correctly set `WONTFIX`
+** [ ] transforming enqueued message to function call parameters
+
+=== Requirements
+* [ ] Logs MUST be written as JSON to `stdout`
+** [x] Logs MUST adhere to the specification agreed upon in Designetz
+** [x] Logs MUST include a request id as `req_id` iff one is provided/iff applicable
+** [x] The log level MUST be configurable via an ENVVAR
+* [ ] The developers MUST provide a Dockerfile
+** [ ] The Dockerfile MUST include recommended http://label-schema.org/rc1/[`LABEL`]-statements
+** [ ] The Dockerfile SHOULD be structured according to https://docs.docker.com/develop/develop-images/dockerfile_best-practices/[best practices]
+** [ ] `SIGTERM`, `SIGINT` signals MUST be propagated properly
+* [ ] The software MUST shut down gracefully upon `SIGTERM`, `SIGINT`
+* [x] The source code MUST adhere to https://www.python.org/dev/peps/pep-0008/[PEP8] with 88 characters per line and 72 characters for comments/docstrings
+* [x] The source code SHOULD adhere to https://www.python.org/dev/peps/pep-0257/[PEP257] (no spaces after/before `"""`)

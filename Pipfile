@@ -1,14 +1,30 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
-lxml = "==4.3.4"
-numpy = "==1.16.4"
-fmpy = {git = "https://github.com/UdSAES/FMPy.git",ref = "hotfix/issue89"}
+loguru = "*"
+numpy = "*"
+pathlib = "*"
+pandas = "*"
+fmpy = {editable = true,path = "./FMPy"}
+pendulum = "*"
+celery = "*"
+pydash = "*"
+scipy = "*"
+redis = "*"
+requests = "*"
+cachetools = "*"
+jinja2 = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
+
+[dev-packages]
+pytest = "*"
+isort = "*"
+black = "*"
+
+[pipenv]
+allow_prereleases = true
