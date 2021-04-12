@@ -23,11 +23,11 @@ All environment variables without a default value MUST be set before starting th
 | Default Value
 
 | SIMWORKER_BROKER_HREF
-| The https://en.wikipedia.org/wiki/URL#Syntax[`scheme` and `authority`-parts] of a URI pointing to the RabbitMQ-instance to be used as message broker.
+| The https://en.wikipedia.org/wiki/URL#Syntax[`scheme` and `authority`-parts] of a URL pointing to the RabbitMQ-instance to be used as message broker.
 | --
 
 | SIMWORKER_BACKEND_HREF
-| The https://en.wikipedia.org/wiki/URL#Syntax[`scheme` and `authority`-parts] of a URI pointing to the Redis-instance to be used as result backend.
+| The https://en.wikipedia.org/wiki/URL#Syntax[`scheme` and `authority`-parts] of a URL pointing to the Redis-instance to be used as result backend.
 | --
 
 | SIMWORKER_TMPFS_PATH
