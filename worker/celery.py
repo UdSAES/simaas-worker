@@ -16,6 +16,7 @@ for var in [
     "BROKER_HREF",
     "BACKEND_HREF",
     "TMPFS_PATH",
+    "TMPFS_MAXSIZE",
 ]:
     try:
         os.environ[f"SIMWORKER_{var}"]
