@@ -10,3 +10,43 @@ Requests for performing simulations are distributed to the worker instances by m
 
 Initially, a custom-made task queue was used instead. See xref:./docs/versions.adoc[./docs/versions.adoc] for the full version history and more information.
 
+== Installation
+...
+
+=== Configuration
+All environment variables without a default value MUST be set before starting the program. Otherwise, a fatal error will be raised and the program will terminate with a non-zero exit code.
+
+[#tbl-envvars,options="header",cols="2,5,1"]
+|===
+| Environment Variable
+| Description
+| Default Value
+
+| SIMWORKER_BROKER_HREF
+| The https://en.wikipedia.org/wiki/URL#Syntax[`scheme` and `authority`-parts] of a URI pointing to the RabbitMQ-instance to be used as message broker.
+| --
+
+| SIMWORKER_BACKEND_HREF
+| The https://en.wikipedia.org/wiki/URL#Syntax[`scheme` and `authority`-parts] of a URI pointing to the Redis-instance to be used as result backend.
+| --
+
+| SIMWORKER_TMPFS_PATH
+| The path at which to store temporary files. Should be a `tmpfs`-mount for better speed but can be a normal directory, too.
+| --
+
+| SIMWORKER_TMPFS_MAXSIZE
+| The maximum amount of bytes that the temporary files are allowed to consume. Iff the total file size of all temporary files exceeds this limit, the least recently used files are deleted.
+| --
+
+| SIMWORKER_LOG_STRUCTURED
+| Whether to output logs as JSON-objects (`"true"`) or formatted strings (`"false"`).
+| `"false"`
+
+| SIMWORKER_LOG_LEVEL
+|  The minimal included https://loguru.readthedocs.io/en/stable/api/logger.html#levels[log level] that shall be printed to `stdout`.
+| `"INFO"`
+
+| DYMOLA_RUNTIME_LICENSE
+| The path to the Dymola license file necessary to simulate FMUs created using Dymola.
+| --
+|===
