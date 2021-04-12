@@ -6,7 +6,7 @@ LABEL org.label-schema.schema-version="1.0.0-rc.1"
 LABEL org.label-schema.name="simaas-worker"
 LABEL org.label-schema.description="SIMaaS-Worker Handling Jobs Distributed via Celery"
 LABEL org.label-schema.vendor="UdS AES"
-LABEL org.label-schema.vcs-url="https://github.com/UdSAES/simaas_worker"
+LABEL org.label-schema.vcs-url="https://github.com/UdSAES/simaas-worker"
 
 # Install dependencies on the base image level
 RUN apt-get update && apt-get install -y \
