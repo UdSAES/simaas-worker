@@ -1,4 +1,4 @@
-# SIMaaS-Worker
+= SIMaaS-Worker
 :simaas_api: https://github.com/UdSAES/simaas-api
 :celery: http://docs.celeryproject.org/en/latest/index.html
 
@@ -46,7 +46,7 @@ All environment variables without a default value MUST be set before starting th
 | `"false"`
 
 | `SIMWORKER_LOG_LEVEL`
-|  The minimal included https://loguru.readthedocs.io/en/stable/api/logger.html#levels[log level] that shall be printed to `stdout`.
+| The minimal included https://loguru.readthedocs.io/en/stable/api/logger.html#levels[log level] that shall be printed to `stdout`.
 | `"INFO"`
 
 | `DYMOLA_RUNTIME_LICENSE`
@@ -54,13 +54,13 @@ All environment variables without a default value MUST be set before starting th
 | --
 |===
 
-## Usage
+== Usage
 Worker instances can be run as native Celery-processes or using Docker.
 
-### Using Docker
+=== Using Docker
 ...
 
-### Using `celery worker`
+=== Using `celery worker`
 The optimal number of worker processes/threads depends on the application -- read the https://docs.celeryproject.org/en/latest/userguide/workers.html#concurrency[note on concurrency in the Celery-manual].
 
 .Running several instances with a fixed thread count
@@ -77,5 +77,5 @@ source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker3@
 source .env; celery -A worker worker --loglevel=INFO --autoscale=10,3
 ----
 
-## Development
+== Development
 _The test suite is currently broken!!_
