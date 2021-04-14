@@ -53,7 +53,7 @@ def sink_JSON_stdout_designetz(message):
 
 logger.remove()
 log_level = os.getenv("SIMWORKER_LOG_LEVEL", "INFO")
-if os.getenv("SIMWORKER_LOG_STRUCTURED", "true") is "true":
+if os.getenv("SIMWORKER_LOG_STRUCTURED", "true") == "true":
     logger.configure(
         levels=[
             dict(name="TRACE", no=10),
