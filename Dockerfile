@@ -23,7 +23,6 @@ WORKDIR $WORKDIR
 # Install app-level dependencies
 COPY --chown=$USER:$USER Pipfile $WORKDIR
 COPY --chown=$USER:$USER Pipfile.lock $WORKDIR
-COPY --chown=$USER:$USER FMPy $WORKDIR/FMPy/
 RUN pipenv install --system --deploy
 
 # Switch to non-root user to complicate privilege escalation
