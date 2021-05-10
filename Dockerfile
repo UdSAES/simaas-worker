@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 UdS AES <https://www.uni-saarland.de/lehrstuhl/frey.html>
+# SPDX-License-Identifier: MIT
+
+
 # Start at current release, but specify version explicitly
 FROM python:3.8-slim-buster AS production
 
