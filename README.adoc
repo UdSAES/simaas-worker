@@ -11,7 +11,10 @@ More specifically, its capability is to execute simulations based on https://fmi
 
 Requests for performing simulations are distributed to the worker instances by means of a distributed task queue implemented using {celery}[Celery]. Consequently, the available computing power can easily be increased both by allowing one instance to use more cores and by starting more instances in a cluster.
 
-Initially, a custom-made task queue was used instead. See xref:./docs/versions.adoc[./docs/versions.adoc] for the full version history and more information.
+== Status
+*Work in Progress!*
+
+The code works as intended, but the test suite is broken due to a change in how simulations are executed. Will be fixed soon, along with an update of the README.
 
 == Installation
 ...
