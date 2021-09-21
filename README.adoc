@@ -1,4 +1,4 @@
-= SIMaaS-Worker
+= A _Simulation as a Service_-Implementation: Worker
 :simaas_api: https://github.com/UdSAES/simaas-api
 :celery: http://docs.celeryproject.org/en/latest/index.html
 
@@ -11,13 +11,8 @@ More specifically, its capability is to execute simulations based on https://fmi
 
 Requests for performing simulations are distributed to the worker instances by means of a distributed task queue implemented using {celery}[Celery]. Consequently, the available computing power can easily be increased both by allowing one instance to use more cores and by starting more instances in a cluster.
 
-== Status
-*Work in Progress!*
-
-The code works as intended, but the test suite is broken due to a change in how simulations are executed. Will be fixed soon, along with an update of the README.
-
 == Installation
-...
+The code can be executed directly on GNU/Linux host machines or containerized using Podman or Docker. In both cases, some environment variables (ENVVARs) must be set according to the table below.
 
 === Configuration
 All environment variables without a default value MUST be set before starting the program. Otherwise, a fatal error will be raised and the program will terminate with a non-zero exit code.
@@ -57,14 +52,8 @@ All environment variables without a default value MUST be set before starting th
 | --
 |===
 
-== Usage
-Worker instances can be run as native Celery-processes or using Docker.
-
-=== Using Docker
-...
-
-=== Using `celery worker`
-The optimal number of worker processes/threads depends on the application -- read the https://docs.celeryproject.org/en/latest/userguide/workers.html#concurrency[note on concurrency in the Celery-manual].
+=== Running via `celery worker`
+First, install the dependenciees (specified in `Pipfile`/`Pipfile.lock`) into a new https://pipenv.pypa.io/en/latest/[Pipenv]-environment using `pipenv install`. Then, activate the environment (`pipenv shell`) and run the commands below from within this environment.
 
 .Running several instances with a fixed thread count
 [source,sh]
@@ -74,11 +63,27 @@ source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker2@
 source .env; celery -A worker worker --loglevel=INFO --concurrency=1 -n worker3@%h
 ----
 
+The optimal number of worker processes/threads depends on the application -- read the https://docs.celeryproject.org/en/latest/userguide/workers.html#concurrency[note on concurrency in the Celery-manual].
+
 .https://docs.celeryproject.org/en/latest/userguide/workers.html#autoscaling[Dynamically spawn new threads if necessary]
 [source, sh]
 ----
 source .env; celery -A worker worker --loglevel=INFO --autoscale=10,3
 ----
 
+=== Running Containerized
+[source, sh]
+----
+podman build -t simaas-worker:latest . # build and tag image
+podman run --name simaas-worker --rm -d simaas-worker:latest
+----
+
+== Usage
+This component is not intended to be used directly --- its sole purpose is to do jobs put into the queue by an instance of the {simaas_api}[SIMaaS-API].
 == Development
-_The test suite is currently broken!!_
+WARNING: The test suite is currently broken!!
+
+== Acknowledgements
+From January 2017 to March 2021, this work was supported by the SINTEG-project https://designetz.de["`Designetz`"] funded by the German Federal Ministry of Economic Affairs and Energy (BMWi) under grant 03SIN224.
+
+image::./docs/logos_uds_aes_designetz_bmwi.png[]
