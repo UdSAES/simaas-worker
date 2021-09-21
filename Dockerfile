@@ -3,7 +3,7 @@
 
 
 # Start at current release, but specify version explicitly
-FROM python:3.8-slim-buster AS production
+FROM python:3.9-slim-buster AS production
 
 # Provide metadata according to namespace suggested by http://label-schema.org/
 LABEL org.label-schema.schema-version="1.0.0-rc.1"

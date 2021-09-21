@@ -19,12 +19,11 @@ jinja2 = "*"
 fmpy = {editable = true,git = "https://github.com/UdSAES/FMPy.git",ref = "hotfix/issue89-v0.2.27"}
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
 
 [dev-packages]
 pytest = "*"
 isort = "*"
-black = "*"
-
-[pipenv]
-allow_prereleases = true
+black = "==21.9b0"
+pyqt5 = "*"
+pyqtgraph = "*"
