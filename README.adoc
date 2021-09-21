@@ -75,11 +75,12 @@ source .env; celery -A worker worker --loglevel=INFO --autoscale=10,3
 [source, sh]
 ----
 podman build -t simaas-worker:latest . # build and tag image
-podman run --name simaas-worker --rm -d simaas-worker:latest
+podman run --name simaas-worker --rm -d simaas-worker:latest # run as container
 ----
 
 == Usage
-This component is not intended to be used directly --- its sole purpose is to do jobs put into the queue by an instance of the {simaas_api}[SIMaaS-API].
+This component is not intended to be used directly -- its sole purpose is to do jobs put into the queue by an instance of the {simaas_api}[SIMaaS-API].
+
 == Development
 WARNING: The test suite is currently broken!!
 
