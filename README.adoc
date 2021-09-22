@@ -75,7 +75,14 @@ source .env; celery -A worker worker --loglevel=INFO --autoscale=10,3
 [source, sh]
 ----
 podman build -t simaas-worker:latest . # build and tag image
-podman run --name simaas-worker --rm -d simaas-worker:latest # run as container
+podman run \
+  --name simaas-worker \
+  --env SIMWORKER_BROKER_HREF=... \
+  --env SIMWORKER_BACKEND_HREF=... \
+  --env SIMWORKER_TMPFS_PATH=... \
+  --env SIMWORKER_TMPFS_MAXSIZE=... \
+  --rm -d \
+  simaas-worker:latest # run as container
 ----
 
 == Usage
