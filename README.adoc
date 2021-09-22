@@ -94,8 +94,21 @@ If a Dymola license is required to execute the FMUs, then you will need to mount
 == Usage
 This component is not intended to be used directly -- its sole purpose is to do jobs put into the queue by an instance of the {simaas_api}[SIMaaS-API].
 
+== Roadmap
+We will work on the following issues in the near future:
+
+* [ ] fix the _test suite that is currently broken (!)_
+* [ ] update the fork of FMPy to the latest upstream developments (or stop using a fork altogether)
+
+We might also spend time on the following (but can't say when for sure):
+
+* [ ] support FMUs for model exchange
+* [ ] support version 3.0 of the FMI standard (not yet released)
+
 == Development
-WARNING: The test suite is currently broken!!
+_In case you find problems, have questions or ideas: please open an issue so that we can discuss it!_
+
+Code formatting is handled by https://github.com/psf/black[`black`] and https://pycqa.github.io/isort/[`isort`], so please install the development dependencies (`pipenv install --dev`) and run them before submitting a pull request.
 
 == Acknowledgements
 From January 2017 to March 2021, this work was supported by the SINTEG-project https://designetz.de["`Designetz`"] funded by the German Federal Ministry of Economic Affairs and Energy (BMWi) under grant 03SIN224.
