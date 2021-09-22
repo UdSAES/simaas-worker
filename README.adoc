@@ -49,11 +49,13 @@ All environment variables without a default value MUST be set before starting th
 
 | `DYMOLA_RUNTIME_LICENSE`
 | The path to the Dymola license file necessary to simulate FMUs created using Dymola.
+
+Obviously this is only necessary iff the FMUs require a license to execute.
 | --
 |===
 
 === Running via `celery worker`
-First, install the dependenciees (specified in `Pipfile`/`Pipfile.lock`) into a new https://pipenv.pypa.io/en/latest/[Pipenv]-environment using `pipenv install`. Then, activate the environment (`pipenv shell`) and run the commands below from within this environment.
+First, install the dependencies (specified in `Pipfile`/`Pipfile.lock`) into a new https://pipenv.pypa.io/en/latest/[Pipenv]-environment using `pipenv install`. Then, activate the environment (`pipenv shell`) and run the commands below from within this environment.
 
 .Running several instances with a fixed thread count
 [source,sh]
@@ -71,6 +73,8 @@ The optimal number of worker processes/threads depends on the application -- rea
 source .env; celery -A worker worker --loglevel=INFO --autoscale=10,3
 ----
 
+If you want to use the GUI of FMPy for testing within the Pipenv-environment, you'll need to install the development dependencies as well  (`pipenv install --dev`) and you probably also need to https://stackoverflow.com/a/56675620[install `python3-tkinter` or similar via your operating systems package manager].
+
 === Running Containerized
 [source, sh]
 ----
@@ -84,6 +88,8 @@ podman run \
   --rm -d \
   simaas-worker:latest # run as container
 ----
+
+If a Dymola license is required to execute the FMUs, then you will need to mount the license file into the container and set the ENVVAR to the path under which the license is available from within the container.
 
 == Usage
 This component is not intended to be used directly -- its sole purpose is to do jobs put into the queue by an instance of the {simaas_api}[SIMaaS-API].
