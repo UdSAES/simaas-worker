@@ -1,11 +1,6 @@
-# Ignore Python Bytecode Files
-*.py[cod]     # Will match .pyc, .pyo and .pyd files.
-__pycache__/  # Exclude the whole folder
-
-# Ignore Node.js-Modules
-node_modules
-
-# Ignore directory ./local
+# Ignore specific directories
+__pycache__/
+node_modules/
 local/
 
 # Ignore fmpy-status indicators
@@ -16,4 +11,6 @@ success.
 .~*.*#  # LibreOffice Calc
 
 # Ignore file for storing the developer's environment
+.vscode/
+*.code-workspace
 .env
