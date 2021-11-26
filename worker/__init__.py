@@ -15,6 +15,7 @@ from loguru import logger
 
 from .worker import FILLNA  # noqa
 from .worker import df_to_repr_json  # noqa
+from .worker import df_to_repr_jsonld  # noqa
 from .worker import parse_model_description  # noqa
 from .worker import prepare_bc_for_fmpy  # noqa
 from .worker import simulate_fmu2_cs  # noqa

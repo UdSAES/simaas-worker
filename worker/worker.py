@@ -9,11 +9,14 @@ import json
 import os
 
 import fmpy
+import nanoid
 import numpy as np
 import pandas as pd
 import pendulum
+import rdflib
 from jinja2 import Environment, FileSystemLoader
 from pydash import py_
+from rdflib.namespace import OWL, RDF, SOSA, TIME, XSD  # FOAF,; PROV,; SSN,
 
 from . import logger
 
@@ -23,6 +26,26 @@ ENV = Environment(
     trim_blocks=True,
     lstrip_blocks=True,
 )
+
+# Declare namespaces to enable enforcing consistent prefixes
+DCT = rdflib.Namespace("http://purl.org/dc/terms/")
+QUDT = rdflib.Namespace("http://qudt.org/schema/qudt/")
+UNIT = rdflib.Namespace("http://qudt.org/vocab/unit/")
+
+# https://rdflib.readthedocs.io/en/stable/apidocs/rdflib.html#rdflib.graph.Graph.bind
+def graph_bind_prefixes(graph):
+    """Bind prefixes to graph instance."""
+
+    graph.bind("rdf", RDF, override=True, replace=True)
+    graph.bind("owl", OWL, override=True, replace=True)
+    graph.bind("xsd", XSD, override=True, replace=True)
+    graph.bind("dct", DCT, override=True, replace=True)
+    graph.bind("qudt", QUDT, override=True, replace=True)
+    graph.bind("sosa", SOSA, override=True, replace=True)
+    graph.bind("time", TIME, override=True, replace=True)
+    graph.bind("unit", UNIT, override=True, replace=True)
+
+    return graph
 
 
 def cast_to_type(var, type):
@@ -353,3 +376,59 @@ def df_to_repr_json(df, fmu, time_is_relative):
 
     # Return JSON-representation of entire dataframe _without_ additional content
     return data
+
+
+def df_to_repr_jsonld(df, fmu, time_is_relative):
+    """Render JSON-LD-representation of DataFrame."""
+
+    logger.debug("df:\n{}".format(df))
+
+    unit_map = {
+        "W": UNIT.W,
+        "kW.h": UNIT["KiloW-HR"],
+        "deg": UNIT.DEG,
+    }
+
+    # Read model description
+    desc = fmpy.read_model_description(fmu)
+
+    # Iterate over columns of dataframe
+    graph = graph_bind_prefixes(rdflib.Graph())
+    for label, series in df.items():
+        # Set unit to '1' if it is undefined
+        # https://github.com/CATIA-Systems/FMPy/blob/master/fmpy/model_description.py#L154
+        model_variable = py_.find(desc.modelVariables, lambda x: x.name == label)
+        if model_variable.unit is not None:
+            unit = model_variable.unit
+        else:
+            unit = "1"
+
+        logger.debug(f"{model_variable.name} / {unit}")
+
+        # Define `sosa:ObservableProperty` for each column
+        observable_iri = f"#{label}"
+        observable_uriref = rdflib.URIRef(observable_iri)
+        graph.add((observable_uriref, RDF.type, SOSA.ObservableProperty))
+
+        for index, value in series.items():
+            # Define `sosa:Observation` for each row
+            observation_id = f"#{nanoid.generate(size=8)}"
+            observation_uriref = rdflib.URIRef(observation_id)
+            graph.add((observation_uriref, RDF.type, SOSA.Observation))
+            graph.add((observation_uriref, SOSA.observedProperty, observable_uriref))
+
+            # Define `qudt:QuantityValue` for each value
+            result_uriref = rdflib.URIRef(f"{observation_id}_result")
+            graph.add((result_uriref, RDF.type, QUDT.QuantityValue))
+            graph.add((result_uriref, QUDT.numericValue, rdflib.Literal(float(value))))
+            graph.add((result_uriref, QUDT.unit, unit_map[unit]))
+            graph.add((observation_uriref, SOSA.hasResult, result_uriref))
+
+            # Define `time:Instant` for each index
+            time_uriref = rdflib.URIRef(f"{observation_id}_time")
+            time_literal = rdflib.Literal(index, datatype=XSD.dateTimeStamp)
+            graph.add((time_uriref, RDF.type, TIME.Instant))
+            graph.add((time_uriref, TIME.inXSDDateTimeStamp, time_literal))
+            graph.add((observation_uriref, SOSA.phenomenonTime, time_uriref))
+
+    return json.loads(graph.serialize(format="application/ld+json"))

@@ -13,7 +13,13 @@ import requests
 import scipy.io as sio
 from cachetools import LRUCache, TTLCache, cached
 
-from worker import df_to_repr_json, logger, parse_model_description, simulate_fmu2_cs
+from worker import (
+    df_to_repr_json,
+    df_to_repr_jsonld,
+    logger,
+    parse_model_description,
+    simulate_fmu2_cs,
+)
 
 from .celery import app
 
@@ -118,8 +124,9 @@ def simulate(task_rep):
     # Format result and return (MUST be serializable as JSON)
     input_time_is_relative = task_rep["simulationParameters"]["inputTimeIsRelative"]
     data_as_json = df_to_repr_json(df, fmu_path, input_time_is_relative)
+    data_as_jsonld = df_to_repr_jsonld(df, fmu_path, input_time_is_relative)
 
-    return data_as_json
+    return {"json": data_as_json, "ld+json": data_as_jsonld}
 
 
 @app.task
