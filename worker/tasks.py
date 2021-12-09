@@ -52,7 +52,7 @@ def get_tmp_filepath(file_content, extension):
 
     filepath = os.path.join(tmp_dir, f"{id}.{extension}")
 
-    with open(filepath, "w+t") as fp:
+    with open(filepath, "w+t", encoding="utf8") as fp:
         fp.write(file_content)
 
     return filepath
