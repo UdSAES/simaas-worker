@@ -15,8 +15,6 @@ More specifically, its capability is to execute simulations based on https://fmi
 
 Requests for performing simulations are distributed to the worker instances by means of a distributed task queue implemented using {celery}[Celery]. Consequently, the available computing power can easily be increased both by allowing one instance to use more cores and by starting more instances in a cluster.
 
-IMPORTANT: *Recent improvements to code and README/documentation have not been pushed to GitHub yet -- will be fixed as soon as possible*, certainly in calender week 7! (2022-02-13)
-
 == Installation
 The code can be executed directly on GNU/Linux host machines or containerized using Podman or Docker. In both cases, some environment variables (ENVVARs) must be set according to the table below.
 
