@@ -55,7 +55,7 @@ Obviously this is only necessary iff the FMUs require a license to execute.
 |===
 
 === Running via `celery worker`
-First, install the dependencies (specified in `Pipfile`/`Pipfile.lock`) into a new https://pipenv.pypa.io/en/latest/[Pipenv]-environment using `pipenv install`. Then, activate the environment (`pipenv shell`) and run the commands below from within this environment.
+First, install the dependencies (specified in `pyproject.toml`/`poetry.lock`) into a new https://python-poetry.org/[Poetry]-environment using `poetry install`. Then, activate the environment (`poetry shell`) and run the commands below from within this environment.
 
 .Running several instances with a fixed thread count
 [source,sh]
@@ -73,11 +73,15 @@ The optimal number of worker processes/threads depends on the application -- rea
 source .env; celery -A worker worker --loglevel=INFO --autoscale=10,3
 ----
 
-If you want to use the GUI of FMPy for testing within the Pipenv-environment, you'll need to install the development dependencies as well  (`pipenv install --dev`) and you probably also need to https://stackoverflow.com/a/56675620[install `python3-tkinter` or similar via your operating systems package manager].
+If you want to use the GUI of FMPy for testing within the Poetry-environment, you'll need to install the development dependencies as well  (`poetry install --dev`) and you probably also need to https://stackoverflow.com/a/56675620[install `python3-tkinter` or similar via your operating systems package manager].
 
 === Running Containerized
+Using Poetry for building container images is complicated/an overkill, so the dependency manifest needs to be exported in a format that `pip` can use when building the image using `poetry export -f requirements.txt --output requirements.txt --without-hashes` before attempting to build.
+
 [source, sh]
 ----
+poetry export -f requirements.txt --output requirements.txt --without-hashes
+
 podman build -t simaas-worker:latest . # build and tag image
 podman run \
   --name simaas-worker \
@@ -97,18 +101,19 @@ This component is not intended to be used directly -- its sole purpose is to do 
 == Roadmap
 We will work on the following issues in the near future:
 
-* [ ] fix the _test suite that is currently broken (!)_
-* [ ] update the fork of FMPy to the latest upstream developments (or stop using a fork altogether)
+* [ ] Fix the _test suite that is currently broken (!)_
+* [ ] Fix type casting for enumerations
+* [ ] Provide robust solution for unit mapping when generating RDF representations
 
 We might also spend time on the following (but can't say when for sure):
 
-* [ ] support FMUs for model exchange
-* [ ] support version 3.0 of the FMI standard (not yet released)
+* [ ] Support FMUs for model exchange
+* [ ] Support version 3.0 of the FMI standard (not yet released)
 
 == Development
 _In case you find problems, have questions or ideas: please open an issue so that we can discuss it!_
 
-Code formatting is handled by https://github.com/psf/black[`black`] and https://pycqa.github.io/isort/[`isort`], so please install the development dependencies (`pipenv install --dev`) and run them before submitting a pull request.
+Code formatting is handled by https://github.com/psf/black[`black`] and https://pycqa.github.io/isort/[`isort`], so please install the development dependencies (`poetry install --dev`) and run them before submitting a pull request.
 
 == Acknowledgements
 From January 2017 to March 2021, this work was supported by the SINTEG-project https://designetz.de["`Designetz`"] funded by the German Federal Ministry of Economic Affairs and Energy (BMWi) under grant 03SIN224.
