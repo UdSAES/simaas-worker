@@ -3,11 +3,9 @@
 *
 
 # Only include specific files/directories
-!FMPy/
 !worker/
 !tests/
 
 !pyproject.toml
 
-!Pipfile
-!Pipfile.lock
+!requirements.txt

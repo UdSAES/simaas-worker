@@ -3,7 +3,7 @@
 
 
 # Start at current release, but specify version explicitly
-FROM python:3.9-slim-buster AS production
+FROM python:3.10-slim-buster AS production
 
 # Provide metadata according to namespace suggested by http://label-schema.org/
 LABEL org.label-schema.schema-version="1.0.0-rc.1"
@@ -16,7 +16,6 @@ LABEL org.label-schema.vcs-url="https://github.com/UdSAES/simaas-worker"
 RUN apt-get update && apt-get install -y \
     git \
   && rm -rf /var/lib/apt/lists/*
-RUN python3 -m pip install pipenv
 
 # Prepare directories and environment
 ENV USER=celery
@@ -25,9 +24,8 @@ RUN adduser $USER --system --group --disabled-password --home $WORKDIR
 WORKDIR $WORKDIR
 
 # Install app-level dependencies
-COPY --chown=$USER:$USER Pipfile $WORKDIR
-COPY --chown=$USER:$USER Pipfile.lock $WORKDIR
-RUN pipenv install --system --deploy
+COPY --chown=$USER:$USER requirements.txt $WORKDIR
+RUN python3 -m pip install -r requirements.txt
 
 # Switch to non-root user to complicate privilege escalation
 USER $USER
