@@ -37,7 +37,7 @@ def mwe():
         index=[1542412800000, 1542416400000, 1542420000000],
     )
     sim_result_df.set_index(
-        pd.DatetimeIndex(sim_result_df.index * 10 ** 6).tz_localize("utc"), inplace=True
+        pd.DatetimeIndex(sim_result_df.index * 10**6).tz_localize("utc"), inplace=True
     )
     sim_result_df.index.name = "time"
 
@@ -218,7 +218,7 @@ def pv_20181117_15kWp_saarbruecken():
     ]  # drop values at intermediate points in time (i.e. not on dense output grid)
     sim_result_df.drop_duplicates("time", inplace=True)  # drop duplicates on index
     sim_result_df.set_index(
-        pd.DatetimeIndex(sim_result_df["time"] * 10 ** 6).tz_localize("utc"),
+        pd.DatetimeIndex(sim_result_df["time"] * 10**6).tz_localize("utc"),
         inplace=True,
     )
     del sim_result_df["time"]

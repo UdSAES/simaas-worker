@@ -316,7 +316,7 @@ def simulate_fmu2_cs(fmu_filepath, parameter_set_filepath, options):
     else:
         df["time"] = df["time"] * 1000 + options["simulationParameters"]["startTime"]
         df.set_index(
-            pd.DatetimeIndex(df["time"] * 10 ** 6).tz_localize("utc"), inplace=True
+            pd.DatetimeIndex(df["time"] * 10**6).tz_localize("utc"), inplace=True
         )
 
         datetime_string_start = pendulum.from_timestamp(
