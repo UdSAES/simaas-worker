@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UdS AES <https://www.uni-saarland.de/lehrstuhl/frey.html>
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
 = Version History
 
 This software is versioned using https://semver.org/spec/v2.0.0.html[Semantic Versioning 2.0.0] (semver) and follows the semver specification.

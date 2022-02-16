@@ -12,8 +12,15 @@ import uuid
 import requests
 import scipy.io as sio
 from cachetools import LRUCache, TTLCache, cached
+from fmi2rdf import assemble_graph
 
-from worker import df_to_repr_json, logger, parse_model_description, simulate_fmu2_cs
+from worker import (
+    df_to_repr_json,
+    df_to_repr_jsonld,
+    logger,
+    parse_model_description,
+    simulate_fmu2_cs,
+)
 
 from .celery import app
 
@@ -46,7 +53,7 @@ def get_tmp_filepath(file_content, extension):
 
     filepath = os.path.join(tmp_dir, f"{id}.{extension}")
 
-    with open(filepath, "w+t") as fp:
+    with open(filepath, "w+t", encoding="utf8") as fp:
         fp.write(file_content)
 
     return filepath
@@ -118,8 +125,9 @@ def simulate(task_rep):
     # Format result and return (MUST be serializable as JSON)
     input_time_is_relative = task_rep["simulationParameters"]["inputTimeIsRelative"]
     data_as_json = df_to_repr_json(df, fmu_path, input_time_is_relative)
+    data_as_jsonld = df_to_repr_jsonld(df, fmu_path, input_time_is_relative)
 
-    return data_as_json
+    return {"json": data_as_json, "ld+json": data_as_jsonld}
 
 
 @app.task
@@ -136,9 +144,21 @@ def get_modelinfo(task_rep):
     t_io_filepath = get_tmp_filepath(template_io, "json.jinja")
 
     records = task_rep["records"]
+    iri_prefix = task_rep["iri_prefix"]
 
     modelinfo = parse_model_description(
         md_filepath, t_p_filepath, t_io_filepath, records
     )
+
+    # Extract triples about FMU, serialized as JSON-LD; add to `modelinfo`
+    records = ",".join(task_rep["records"])
+    graph_serialized = assemble_graph(
+        md_filepath,
+        iri_prefix,
+        shapes=True,
+        blackbox=False,
+        records=records,
+    ).serialize(format="application/ld+json")
+    modelinfo["graph"] = json.loads(graph_serialized)
 
     return json.dumps(modelinfo)

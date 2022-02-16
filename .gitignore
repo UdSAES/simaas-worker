@@ -1,11 +1,10 @@
-# Ignore Python Bytecode Files
-*.py[cod]     # Will match .pyc, .pyo and .pyd files.
-__pycache__/  # Exclude the whole folder
+# SPDX-FileCopyrightText: 2022 UdS AES <https://www.uni-saarland.de/lehrstuhl/frey.html>
+#
+# SPDX-License-Identifier: CC0-1.0
 
-# Ignore Node.js-Modules
-node_modules
-
-# Ignore directory ./local
+# Ignore specific directories
+__pycache__/
+node_modules/
 local/
 
 # Ignore fmpy-status indicators
@@ -16,4 +15,9 @@ success.
 .~*.*#  # LibreOffice Calc
 
 # Ignore file for storing the developer's environment
+.vscode/
+*.code-workspace
 .env
+
+# Ignore requirements.txt
+requirements.txt
