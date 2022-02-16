@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 UdS AES <https://www.uni-saarland.de/lehrstuhl/frey.html>
+//
+// SPDX-License-Identifier: CC-BY-4.0
+
 = A _Simulation as a Service_-Implementation: Worker
 :simaas_api: https://github.com/UdSAES/simaas-api
 :celery: http://docs.celeryproject.org/en/latest/index.html
