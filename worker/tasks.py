@@ -12,6 +12,7 @@ import uuid
 import requests
 import scipy.io as sio
 from cachetools import LRUCache, TTLCache, cached
+from fmi2rdf import assemble_graph
 
 from worker import (
     df_to_repr_json,
@@ -143,9 +144,21 @@ def get_modelinfo(task_rep):
     t_io_filepath = get_tmp_filepath(template_io, "json.jinja")
 
     records = task_rep["records"]
+    iri_prefix = task_rep["iri_prefix"]
 
     modelinfo = parse_model_description(
         md_filepath, t_p_filepath, t_io_filepath, records
     )
+
+    # Extract triples about FMU, serialized as JSON-LD; add to `modelinfo`
+    records = ",".join(task_rep["records"])
+    graph_serialized = assemble_graph(
+        md_filepath,
+        iri_prefix,
+        shapes=True,
+        blackbox=False,
+        records=records,
+    ).serialize(format="application/ld+json")
+    modelinfo["graph"] = json.loads(graph_serialized)
 
     return json.dumps(modelinfo)
