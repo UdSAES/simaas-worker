@@ -30,3 +30,39 @@ exclude = '''
 [tool.isort]
 profile = "black"
 skip = ["FMPy", "local"]
+
+[tool.poetry]
+name = "simaas-worker"
+version = "0.2.0-beta.1"
+description = "SIMaaS-Worker Handling Jobs Distributed via Celery"
+authors = ["Moritz Stüber <moritz.stueber@aut.uni-saarland.de>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.11"
+loguru = "^0.6.0"
+numpy = "^1.22.2"
+pandas = "^1.4.1"
+pendulum = "^2.1.2"
+celery = "^5.2.3"
+pydash = "^5.1.0"
+scipy = "^1.8.0"
+redis = "^4.1.3"
+requests = "^2.27.1"
+cachetools = "^5.0.0"
+Jinja2 = "^3.0.3"
+rdflib = "^6.1.1"
+nanoid = "^2.0.0"
+invoke = "^1.6.0"
+FMPy = "^0.3.5"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0.1"
+isort = "^5.10.1"
+black = "^22.1.0"
+PyQt5 = "^5.15.6"
+pyqtgraph = "^0.12.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
