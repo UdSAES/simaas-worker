@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 loguru = "*"
 numpy = "*"
-pathlib = "*"
 pandas = "*"
 pendulum = "*"
 celery = "*"
@@ -16,13 +15,13 @@ redis = "*"
 requests = "*"
 cachetools = "*"
 jinja2 = "*"
-fmpy = {editable = true,git = "https://github.com/UdSAES/FMPy.git",ref = "hotfix/issue89-v0.2.27"}
 rdflib = "*"
 nanoid = "*"
 invoke = "*"
+fmpy = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
 
 [dev-packages]
 pytest = "*"
