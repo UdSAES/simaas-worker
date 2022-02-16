@@ -19,6 +19,7 @@ jinja2 = "*"
 fmpy = {editable = true,git = "https://github.com/UdSAES/FMPy.git",ref = "hotfix/issue89-v0.2.27"}
 rdflib = "*"
 nanoid = "*"
+invoke = "*"
 
 [requires]
 python_version = "3.9"
@@ -26,6 +27,6 @@ python_version = "3.9"
 [dev-packages]
 pytest = "*"
 isort = "*"
-black = "==21.9b0"
+black = "*"
 pyqt5 = "*"
 pyqtgraph = "*"
