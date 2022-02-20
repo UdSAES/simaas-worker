@@ -80,7 +80,7 @@ def scalar_variable_as_obj(x):
         "type": type_map[x.type],
         # "dimensions": x.dimensions,
         # "dimensionValueReferences": x.dimensionValueReferences,
-        "quantitiy": x.quantitiy,
+        # "quantitiy": x.quantitiy,
         "unit": x.unit,
         # "displayUnit": x.displayUnit,
         # "relativeQuantity": x.relativeQuantity,
