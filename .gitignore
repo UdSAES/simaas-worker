@@ -18,6 +18,3 @@ success.
 .vscode/
 *.code-workspace
 .env
-
-# Ignore requirements.txt
-requirements.txt
