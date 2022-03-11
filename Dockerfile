@@ -15,6 +15,8 @@ LABEL org.label-schema.vcs-url="https://github.com/UdSAES/simaas-worker"
 # Install dependencies on the base image level
 RUN apt-get update && apt-get install -y \
     git \
+    tini \
+    gosu \
   && rm -rf /var/lib/apt/lists/*
 
 # Prepare directories and environment
@@ -27,6 +29,8 @@ WORKDIR $WORKDIR
 COPY --chown=$USER:$USER requirements.txt $WORKDIR
 RUN python3 -m pip install -r requirements.txt
 
+COPY entrypoint.sh /entrypoint.sh
+
 # Switch to non-root user to complicate privilege escalation
 USER $USER
 
@@ -38,5 +42,7 @@ COPY --chown=$USER:$USER worker $WORKDIR/worker/
 ARG VCS_REF
 LABEL org.label-schema.vcs-ref=$VCS_REF
 
+USER root
+
 # Unless overridden, run this command upon instantiation
-ENTRYPOINT [ "celery", "--app=worker", "worker"]
+ENTRYPOINT [ "/entrypoint.sh", "celery", "--app=worker", "worker"]

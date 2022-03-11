@@ -13,3 +13,4 @@
 !pyproject.toml
 
 !requirements.txt
+!entrypoint.sh
